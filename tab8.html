@@ -106,7 +106,7 @@
     <button class="nav-btn" onclick="location.href='tab2.html'">🎬 GD’s Motion Lab</button>
     <button class="nav-btn" onclick="location.href='tab4.html'">📦 배송 미션</button>
     <button class="nav-btn active" id="nav-manual" onclick="showTab('manual')">📒 업무 매뉴얼</button>
-    <button class="nav-btn" id="nav-cert" onclick="showTab('cert')" disabled>🪪 GD 자격증</button>
+    <button class="nav-btn" id="nav-cert" onclick="showTab('cert')">🪪 GD 자격증</button>
 </nav>
 
     <main>
@@ -239,11 +239,24 @@
     }
 
     function showHint() { document.getElementById('hint-text').innerText = quizzes[currentQuiz].hint; document.getElementById('hint-modal').style.display = 'block'; }
-    function goToCert() { 
-        document.getElementById('cert-popup').style.display = 'none'; 
-        document.getElementById('nav-cert').disabled = false; 
-        showTab('cert'); 
-    }
+    function goToCert() {  
+    document.getElementById('cert-popup').style.display = 'none';
+
+    document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.remove('active');
+    });
+
+    document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('active');
+    });
+
+    document.getElementById('tab-cert').classList.add('active');
+    document.getElementById('nav-cert').classList.add('active');
+
+    const now = new Date();
+    document.getElementById('current-date').innerText =
+        `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 기준`;
+}
 
     function showTab(t) {
         document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
