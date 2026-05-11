@@ -2,97 +2,92 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gravity Deliverer</title>
-
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@700&display=swap');
 
 body{
-    margin:0;
-    width:100vw;
-    height:100vh;
-    overflow:hidden;
-    background:#020617;
-    font-family:sans-serif;
+  margin:0;
+  min-height:100vh;
+  background:#020617;
+  color:white;
+  font-family:'Jua', sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-header{
-    height:90px;
-    background:#071120;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    color:white;
-    border-bottom:1px solid rgba(255,255,255,0.08);
+.wrap{
+  width:min(1000px, 92vw);
+  text-align:center;
+}
+
+.top{
+  color:#ffccff;
+  margin-bottom:10px;
 }
 
 h1{
-    margin:0;
-    color:#00f7ff;
+  font-family:'Gaegu', cursive;
+  color:#00f7ff;
+  font-size:3rem;
+  margin:0 0 30px;
 }
 
-.tabs{
-    margin-top:10px;
-    display:flex;
-    gap:10px;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:16px;
 }
 
-button{
-    border:none;
-    padding:10px 16px;
-    border-radius:12px;
-    cursor:pointer;
-    background:#111827;
-    color:white;
+a{
+  display:block;
+  text-decoration:none;
+  color:white;
+  background:#0f172a;
+  border:2px solid rgba(255,255,255,0.12);
+  border-radius:22px;
+  padding:24px 18px;
+  font-size:1.25rem;
+  box-shadow:0 0 20px rgba(0,0,0,0.25);
 }
 
-button:hover{
-    background:#00f7ff;
-    color:black;
+a:hover{
+  border-color:#00f7ff;
+  box-shadow:0 0 18px rgba(0,247,255,0.35);
+  transform:translateY(-2px);
 }
 
-iframe{
-    width:100%;
-    height:calc(100vh - 90px);
-    border:none;
-    display:block;
-    background:black;
+.small{
+  margin-top:24px;
+  color:#fff200;
+  font-size:1rem;
 }
 
+@media(max-width:700px){
+  h1{font-size:2rem;}
+  .grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
-
 <body>
+<div class="wrap">
+  <div class="top">🎶 나도 어디서 꿀리지 않아~ GD(Gravity Deliverer)! 🎶</div>
+  <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
 
-<header>
+  <div class="grid">
+    <a href="tab1.html">🛸 탭1 신입 기사 훈련소</a>
+    <a href="tab2.html">🎬 탭2 Lab1 자유낙하</a>
+    <a href="tab3.html">☄ 탭3 Lab2 수평 던지기</a>
+    <a href="tab4.html">🚀 탭4 M1 속력 대결</a>
+    <a href="tab5.html">📏 탭5 M2 높이 대결</a>
+    <a href="tab6.html">👯 탭6 M3 동시 배송</a>
+    <a href="tab7.html">🌌 탭7 M4 은하계 원정</a>
+    <a href="tab8.html">📒 탭8 업무 매뉴얼/자격증</a>
+  </div>
 
-<h1>Gravity Deliverer</h1>
-
-<div class="tabs">
-
-<button onclick="openTab('tab1.html')">
-탭1
-</button>
-
+  <div class="small">각 탭은 전체 화면에서 독립 실행됩니다.</div>
 </div>
-
-</header>
-
-<iframe id="viewer"
-src="tab1.html">
-</iframe>
-
-<script>
-
-function openTab(page){
-
-    document.getElementById('viewer').src = page;
-}
-
-</script>
-
 </body>
 </html>
