@@ -2,25 +2,97 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>테스트</title>
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Gravity Deliverer</title>
+
 <style>
+
 body{
     margin:0;
     width:100vw;
     height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    overflow:hidden;
     background:#020617;
-    color:#00f7ff;
-    font-size:3rem;
     font-family:sans-serif;
 }
+
+header{
+    height:90px;
+    background:#071120;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+h1{
+    margin:0;
+    color:#00f7ff;
+}
+
+.tabs{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+}
+
+button{
+    border:none;
+    padding:10px 16px;
+    border-radius:12px;
+    cursor:pointer;
+    background:#111827;
+    color:white;
+}
+
+button:hover{
+    background:#00f7ff;
+    color:black;
+}
+
+iframe{
+    width:100%;
+    height:calc(100vh - 90px);
+    border:none;
+    display:block;
+    background:black;
+}
+
 </style>
 </head>
+
 <body>
 
-🚀 GitHub Pages 성공!
+<header>
+
+<h1>Gravity Deliverer</h1>
+
+<div class="tabs">
+
+<button onclick="openTab('tab1.html')">
+탭1
+</button>
+
+</div>
+
+</header>
+
+<iframe id="viewer"
+src="tab1.html">
+</iframe>
+
+<script>
+
+function openTab(page){
+
+    document.getElementById('viewer').src = page;
+}
+
+</script>
 
 </body>
 </html>
