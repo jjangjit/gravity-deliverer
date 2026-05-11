@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Deliverer - Lab 2</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
+
+        :root {
+            --navy-deep: #020617;
+            --navy-mid: #0f172a;
+            --cyan: #00f7ff;
+            --magenta: #ff2ef7;
+            --yellow: #fff200;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: var(--navy-deep); color: var(--white);
+            font-family: 'Nanum Gothic', sans-serif; overflow: hidden;
+        }
+
+        .app-container { 
+            display: flex; flex-direction: column; 
+            width: 100vw; height: 100vh; padding: 5px; 
+            overflow: hidden; 
+        }
+
+        header { padding: 5px 0; text-align: center; flex-shrink: 0; }
+        header .top-slogan { font-size: 1.1rem; color: #ffccff; font-weight: bold; font-family: 'Jua', sans-serif; }
+        header h1 { margin: 0; font-size: 2.2rem; font-family: 'Jua', sans-serif; color: var(--cyan); }
+        
+        .fs-btn { position: absolute; right: 20px; top: 15px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--cyan); background: rgba(0, 247, 255, 0.1); color: var(--cyan); cursor: pointer; font-size: 0.75rem; font-family: 'Jua'; }
+
+        nav { display: flex; justify-content: center; padding: 3px; gap: 10px; flex-shrink: 0; }
+        .nav-btn { padding: 8px 15px; border: none; background: rgba(255,255,255,0.1); color: #aaa; border-radius: 12px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        .nav-btn.active { background: #fff; color: var(--navy-deep); box-shadow: 0 0 10px #fff; }
+
+        .sub-nav { display: flex; justify-content: center; gap: 10px; margin-top: 3px; flex-shrink: 0; }
+        .sub-btn { padding: 4px 12px; border-radius: 15px; border: 1px solid var(--magenta); background: rgba(255, 46, 247, 0.1); color: var(--magenta); font-family: 'Jua', sans-serif; cursor: pointer; font-size: 0.8rem; }
+        .sub-btn.active { background: var(--magenta); color: white; }
+
+        .info-section { display: flex; gap: 12px; padding: 0 15px; margin: 8px 0; height: 130px; flex-shrink: 0; }
+        .cat-box { flex: 1.2; display: flex; align-items: flex-end; gap: 12px; background: rgba(0,0,0,0.6); padding: 12px; border-radius: 20px; border: 2px solid var(--glass); }
+        .cat-character { width: 65px; filter: drop-shadow(0 0 8px var(--cyan)); flex-shrink: 0; }
+        .dialogue { flex: 1; font-size: 1.05rem; line-height: 1.5; font-family: 'Jua', sans-serif; color: #f8f8f8; overflow-y: auto; }
+        .dialogue b { color: var(--yellow); }
+
+        .data-header-panel { flex: 1.5; display: flex; flex-direction: column; gap: 6px; }
+        .data-row { display: flex; gap: 6px; flex: 1; }
+        .data-item-top { background: var(--navy-mid); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 5px; flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+        .data-label-top { font-size: 0.65rem; color: #aaa; font-weight: bold; }
+        .data-val-top { font-size: 1.05rem; font-weight: bold; color: var(--yellow); font-family: monospace; }
+
+        main { flex: 1; display: grid; grid-template-columns: 1fr 340px; gap: 12px; padding: 0 10px; min-height: 0; overflow: hidden; }
+        .sim-view { background: #000; border-radius: 25px; border: 2px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+        
+        .graph-column { display: flex; flex-direction: column; gap: 8px; height: 100%; }
+        .graph-card { flex: 1; background: #080c1d; border-radius: 18px; border: 2px solid var(--magenta); position: relative; padding: 8px; display: flex; flex-direction: column; min-height: 0; }
+        .graph-label-box { text-align: center; font-size: 0.75rem; color: #fff; font-family: 'Jua', sans-serif; margin-bottom: 2px; }
+
+        canvas { width: 100%; height: 100%; display: block; }
+
+        .controls { padding: 15px 25px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; background: rgba(0,0,0,0.5); border-top: 2px solid var(--glass); }
+        .control-row { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; }
+        .slider-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 30px; flex: 3; }
+        .slider-wrap { display: flex; align-items: center; gap: 12px; color: var(--cyan); font-size: 0.9rem; font-weight: bold; font-family: 'Jua'; }
+        input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; height: 8px; }
+
+        .btn { padding: 15px 30px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-family: 'Jua'; transition: 0.2s; }
+        .btn-drop { background: linear-gradient(to right, var(--cyan), var(--magenta)); color: #fff; flex: 1; font-size: 1.3rem; box-shadow: 0 0 20px rgba(0,247,255,0.4); height: 60px; }
+        .btn-reset { background: #334155; color: #fff; width: 100px; font-size: 1rem; height: 60px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <button class="fs-btn" onclick="toggleFullScreen()">전체화면</button>
+        <div class="top-slogan">🎶 나도 어디서 꿀리지 않아~ GD(Gravity Deliverer)! 🎶</div>
+        <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
+    </header>
+
+    <nav>
+        <button class="nav-btn">🛸 신입 기사 훈련소</button>
+        <button class="nav-btn active">🎬 GD’s Motion Lab</button>
+        <button class="nav-btn">📦 배송 미션</button>
+        <button class="nav-btn">📒 업무 매뉴얼</button>
+        <button class="nav-btn">🪪 GD 자격증</button>
+    </nav>
+
+    <div class="sub-nav">
+        <button class="sub-btn" style="opacity: 0.5;">📦 Lab1. 무거운 물체 배송 (자유낙하)</button>
+        <button class="sub-btn active">☄ Lab2. 장거리 배송 (수평 던지기)</button>
+    </div>
+
+    <div class="info-section">
+        <div class="cat-box">
+            <svg class="cat-character" viewBox="0 0 100 120">
+                <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="#00f7ff" stroke-width="2"/>
+                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/><circle cx="50" cy="45" r="25" fill="#f8fafc"/>
+                <path d="M35 30 L25 10 L45 25 Z" fill="#e2e8f0"/><path d="M65 30 L75 10 L55 25 Z" fill="#e2e8f0"/>
+                <circle cx="42" cy="42" r="3" fill="#000"/><circle cx="58" cy="42" r="3" fill="#000"/>
+                <path d="M48 50 Q50 55 52 50" stroke="#000" fill="none" stroke-width="2"/>
+                <rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/><text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
+            </svg>
+            <div class="dialogue" id="dialogue">
+                Yo~ 자유낙하는 마스터했냥? 이번엔 멀리 있는 고객님께 ☄ <b>장거리 배송</b>을 해보자냥! <br> 
+                옆으로 세게 던지면, <b>더 빠르게 떨어질지</b> 확인해봐냥! 눈금과 📸 <b>잔상 위치</b>를 잘 보라냥!
+            </div>
+        </div>
+        
+        <div class="data-header-panel">
+            <div class="data-row">
+                <div class="data-item-top"><div class="data-label-top">🔵 자유낙하 도착시간</div><div class="data-val-top" id="hit-a">-</div></div>
+                <div class="data-item-top"><div class="data-label-top">🔴 수평운동 도착시간</div><div class="data-val-top" id="hit-b">-</div></div>
+            </div>
+            <div class="data-row">
+                <div class="data-item-top"><div class="data-label-top">🔵 낙하 높이</div><div class="data-val-top" id="ha-val">10.0m</div></div>
+                <div class="data-item-top"><div class="data-label-top">🔴 낙하 높이</div><div class="data-val-top" id="hb-val">10.0m</div></div>
+                <div class="data-item-top"><div class="data-label-top">📏 수평 도달 거리(x)</div><div class="data-val-top" id="dist-val">0.0 m</div></div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="sim-view" id="sim-view"><canvas id="simCanvas"></canvas></div>
+        <div class="graph-column">
+            <div class="graph-card">
+                <div class="graph-label-box">📈 자유낙하물체 속력 변화</div>
+                <div class="graph-canvas-wrap"><canvas id="graphFree"></canvas></div>
+            </div>
+            <div class="graph-card">
+                <div class="graph-label-box">📈 수평물체 가로속력 변화</div>
+                <div class="graph-canvas-wrap"><canvas id="graphProjX"></canvas></div>
+            </div>
+            <div class="graph-card">
+                <div class="graph-label-box">📈 수평물체 세로속력 변화</div>
+                <div class="graph-canvas-wrap"><canvas id="graphProjY"></canvas></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="controls">
+        <div class="control-row">
+            <div class="slider-group">
+                <div class="slider-wrap">📏 높이 설정 <input type="range" id="h-range" min="4" max="20" step="1" value="10"></div>
+                <div class="slider-wrap">☄ 수평 속도 <input type="range" id="vx-range" min="0" max="20" step="1" value="8"></div>
+                <div class="slider-wrap">🌌 중력 가속도 <input type="range" id="g-range" min="1" max="20" step="0.1" value="9.8"></div>
+                <div class="slider-wrap">📸 섬광 간격 <input type="range" id="i-range" min="0.05" max="0.5" step="0.01" value="0.15"></div>
+            </div>
+            <button class="btn btn-drop" id="drop-btn" onclick="startSim()">DROP THE BEAT!</button>
+            <button class="btn btn-reset" onclick="resetSim()">리셋</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const simCanvas = document.getElementById('simCanvas');
+    const simCtx = simCanvas.getContext('2d');
+    
+    const graphObjects = {
+        free: { canvas: document.getElementById('graphFree'), data: [], color: '#00f7ff', xLabel: '시간(t)', yLabel: ['속','력','(v)'] },
+        projX: { canvas: document.getElementById('graphProjX'), data: [], color: '#fff200', xLabel: '시간(t)', yLabel: ['가','로',' '] },
+        projY: { canvas: document.getElementById('graphProjY'), data: [], color: '#ff2ef7', xLabel: '시간(t)', yLabel: ['세','로',' '] }
+    };
+
+    let isRunning = false, time = 0, lastFlashTime = 0;
+    let params = { h: 10, vx: 8, g: 9.8, interval: 0.15 };
+    let objA = {}, objB = {}, strobes = [];
+
+    function resize() {
+        simCanvas.width = simCanvas.offsetWidth; simCanvas.height = simCanvas.offsetHeight;
+        Object.values(graphObjects).forEach(g => {
+            g.canvas.width = g.canvas.offsetWidth;
+            g.canvas.height = g.canvas.offsetHeight;
+        });
+        draw();
+    }
+    window.addEventListener('resize', () => { setTimeout(resize, 50); });
+    window.addEventListener('load', resize);
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+    }
+
+    function resetSim() {
+        isRunning = false; time = 0; lastFlashTime = 0; strobes = [];
+        params.h = parseFloat(document.getElementById('h-range').value);
+        params.vx = parseFloat(document.getElementById('vx-range').value);
+        params.g = parseFloat(document.getElementById('g-range').value);
+        params.interval = parseFloat(document.getElementById('i-range').value);
+        
+        objA = { x: 70, y: 40, vy: 0, landed: false, hitTime: null };
+        objB = { x: 70, y: 40, vx: params.vx, vy: 0, landed: false, hitTime: null };
+        Object.values(graphObjects).forEach(g => g.data = []);
+        
+        document.getElementById('hit-a').innerText = "-";
+        document.getElementById('hit-b').innerText = "-";
+        document.getElementById('ha-val').innerText = params.h.toFixed(1) + "m";
+        document.getElementById('hb-val').innerText = params.h.toFixed(1) + "m";
+        document.getElementById('dist-val').innerText = "0.0 m";
+        document.getElementById('drop-btn').innerText = "DROP THE BEAT!";
+        draw();
+    }
+
+    function startSim() {
+        if(isRunning) { resetSim(); return; }
+        resetSim(); isRunning = true;
+        document.getElementById('drop-btn').innerText = "STOP";
+    }
+
+    function loop() {
+        if (isRunning) {
+            const dt = 1/60; time += dt;
+            const updateObj = (o, isProj) => {
+                if (o.landed) return;
+                o.vy += params.g * dt;
+                o.y += o.vy * (simCanvas.height - 70) / params.h * dt; 
+                if (isProj) o.x += o.vx * (simCanvas.width - 150) / 25 * dt;
+                
+                if (o.y >= simCanvas.height - 30) { 
+                    o.y = simCanvas.height - 30; 
+                    o.landed = true; 
+                    o.hitTime = time;
+                }
+            };
+            updateObj(objA, false); updateObj(objB, true);
+
+            if (time - lastFlashTime >= params.interval) {
+                strobes.push({ ax: objA.x, ay: objA.y, bx: objB.x, by: objB.y });
+                lastFlashTime = time;
+            }
+
+            graphObjects.free.data.push(objA.vy);
+            graphObjects.projX.data.push(objB.vx);
+            graphObjects.projY.data.push(objB.vy);
+
+            if (!objA.landed) document.getElementById('ha-val').innerText = Math.max(0, (simCanvas.height - 30 - objA.y)/25).toFixed(1) + "m";
+            else {
+                document.getElementById('ha-val').innerText = "0.0m";
+                if(document.getElementById('hit-a').innerText === "-") document.getElementById('hit-a').innerText = objA.hitTime.toFixed(3) + "s";
+            }
+
+            if (!objB.landed) {
+                document.getElementById('hb-val').innerText = Math.max(0, (simCanvas.height - 30 - objB.y)/25).toFixed(1) + "m";
+                document.getElementById('dist-val').innerText = ((objB.x - 70)/20).toFixed(1) + " m";
+            } else {
+                document.getElementById('hb-val').innerText = "0.0m";
+                if(document.getElementById('hit-b').innerText === "-") document.getElementById('hit-b').innerText = objB.hitTime.toFixed(3) + "s";
+            }
+
+            if (objA.landed && objB.landed) { isRunning = false; document.getElementById('drop-btn').innerText = "리셋하기"; }
+        }
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    function draw() {
+        simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+        const groundY = simCanvas.height - 30;
+
+        // 그리드
+        simCtx.strokeStyle = "rgba(255,255,255,0.08)"; simCtx.lineWidth = 1; simCtx.fillStyle = "#888"; simCtx.font = "10px Arial";
+        for(let i=0; i<=params.h; i+=2) {
+            let y = 40 + i * (groundY - 40) / params.h;
+            simCtx.beginPath(); simCtx.moveTo(50, y); simCtx.lineTo(simCanvas.width, y); simCtx.stroke();
+            simCtx.fillText((params.h - i) + "m", 20, y + 4);
+        }
+        for(let i=0; i<=30; i+=5) {
+            let x = 70 + i * (simCanvas.width - 150) / 25;
+            simCtx.beginPath(); simCtx.moveTo(x, 20); simCtx.lineTo(x, groundY); simCtx.stroke();
+            simCtx.fillText(i + "m", x - 10, groundY + 15);
+        }
+
+        // 바닥
+        simCtx.fillStyle = "#334155"; simCtx.fillRect(0, groundY, simCanvas.width, 30);
+        simCtx.strokeStyle = "#00f7ff"; simCtx.lineWidth = 2; simCtx.beginPath(); simCtx.moveTo(0, groundY); simCtx.lineTo(simCanvas.width, groundY); simCtx.stroke();
+
+        // 잔상
+        strobes.forEach(s => {
+            simCtx.globalAlpha = 0.3;
+            simCtx.fillStyle = "#00f7ff"; simCtx.beginPath(); simCtx.arc(s.ax, s.ay, 8, 0, Math.PI*2); simCtx.fill();
+            simCtx.fillStyle = "#ff2ef7"; simCtx.beginPath(); simCtx.arc(s.bx, s.by, 8, 0, Math.PI*2); simCtx.fill();
+            simCtx.setLineDash([3, 3]); simCtx.strokeStyle = "#fff";
+            simCtx.beginPath(); simCtx.moveTo(s.ax, s.ay); simCtx.lineTo(s.bx, s.by); simCtx.stroke();
+            simCtx.beginPath(); simCtx.moveTo(s.bx, s.by); simCtx.lineTo(s.bx, groundY); simCtx.stroke();
+            simCtx.setLineDash([]); simCtx.globalAlpha = 1.0;
+        });
+
+        // 현재 물체
+        const drawBall = (o, color, icon) => {
+            simCtx.fillStyle = color; simCtx.beginPath(); simCtx.arc(o.x, o.y, 14, 0, Math.PI*2); simCtx.fill();
+            simCtx.strokeStyle = "#fff"; simCtx.lineWidth = 2; simCtx.stroke();
+            simCtx.fillStyle = "#fff"; simCtx.font = "20px serif"; simCtx.textAlign = "center";
+            simCtx.fillText(icon, o.x, o.y + 7);
+            if (o.vx && !o.landed) { simCtx.strokeStyle = "#fff200"; simCtx.lineWidth=3; simCtx.beginPath(); simCtx.moveTo(o.x, o.y); simCtx.lineTo(o.x + o.vx*5, o.y); simCtx.stroke(); }
+            if (!o.landed) { simCtx.strokeStyle = "#00f7ff"; simCtx.lineWidth=3; simCtx.beginPath(); simCtx.moveTo(o.x, o.y); simCtx.lineTo(o.x, o.y + o.vy*5); simCtx.stroke(); }
+        };
+        drawBall(objA, "#00f7ff", "📦"); drawBall(objB, "#ff2ef7", "🚀");
+
+        // [핵심] 정석 v-t 그래프 (동적 연동 보강)
+        Object.values(graphObjects).forEach(g => {
+            const ctx = g.canvas.getContext('2d'), w = g.canvas.width, h = g.canvas.height;
+            const padL = 45, padR = 65, padT = 20, padB = 35;
+            ctx.clearRect(0,0,w,h);
+            
+            // 그래프 보조 그리드 (기울기 비교용)
+            ctx.strokeStyle = "rgba(255,255,255,0.05)"; ctx.lineWidth = 1;
+            for(let i=1; i<4; i++) {
+                let gx = padL + i * (w-padL-padR)/4;
+                ctx.beginPath(); ctx.moveTo(gx, padT); ctx.lineTo(gx, h-padB); ctx.stroke();
+                let gy = padB + i * (h-padT-padB)/4;
+                ctx.beginPath(); ctx.moveTo(padL, h-gy); ctx.lineTo(w-padR, h-gy); ctx.stroke();
+            }
+
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5; ctx.beginPath();
+            ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(padL-4, padT+8); ctx.lineTo(padL, padT); ctx.lineTo(padL+4, padT+8);
+            ctx.moveTo(w-padR-8, h-padB-5); ctx.lineTo(w-padR, h-padB); ctx.lineTo(w-padR-8, h-padB+5);
+            ctx.stroke();
+            
+            ctx.fillStyle = "#fff200"; ctx.font = "bold 10px Nanum Gothic"; ctx.textAlign = "center";
+            for(let i=0; i<g.yLabel.length; i++) ctx.fillText(g.yLabel[i], padL - 25, padT + 12 + (i*14));
+            ctx.textAlign = "left"; ctx.fillText(g.xLabel, w - padR + 8, h - padB + 5);
+
+            if(g.data.length < 2) return;
+            
+            // X축 스케일링: 이론적 도착 시간에 비례
+            const theoreticalTime = Math.sqrt(2 * params.h / params.g);
+            const theoreticalFrames = theoreticalTime * 60;
+            const usableWidth = w - padL - padR;
+            const stepX = usableWidth / theoreticalFrames;
+            
+            ctx.strokeStyle = g.color; ctx.lineWidth = 3; ctx.beginPath();
+            
+            // Y축 스케일링: 고정 범위 (최대 25m/s 기준)로 하여 기울기 변화 체감 유도
+            const maxVScale = 25; 
+            const scaleY = (h - padB - padT - 10) / maxVScale;
+            
+            ctx.moveTo(padL, (h - padB) - g.data[0] * scaleY);
+            for(let i=1; i<g.data.length; i++) {
+                let currentX = padL + i * stepX;
+                if (currentX > w - padR) currentX = w - padR;
+                ctx.lineTo(currentX, (h - padB) - g.data[i] * scaleY);
+            }
+            ctx.stroke();
+        });
+    }
+
+    resetSim();
+    requestAnimationFrame(loop);
+</script>
+</body>
+</html>

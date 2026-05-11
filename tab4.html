@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Deliverer - M1</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
+
+        :root {
+            --navy-deep: #020617;
+            --navy-mid: #0f172a;
+            --cyan: #00f7ff;
+            --magenta: #ff2ef7;
+            --yellow: #fff200;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--navy-deep); color: var(--white); font-family: 'Nanum Gothic', sans-serif; overflow: hidden; }
+
+        .app-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; padding: 5px; overflow: hidden; position: relative; }
+
+        header { padding: 10px 0 5px; text-align: center; position: relative; flex-shrink: 0; z-index: 10; }
+        header .top-slogan { font-size: 1.1rem; color: #ffccff; font-weight: bold; font-family: 'Jua', sans-serif; margin-bottom: 5px; }
+        header h1 { margin: 0; font-size: 2.8rem; font-family: 'Jua', sans-serif; color: var(--cyan); letter-spacing: 1px; text-shadow: none; }
+        
+        .fs-btn { position: absolute; right: 20px; top: 15px; padding: 8px 15px; border-radius: 8px; border: 1px solid var(--cyan); background: rgba(0, 247, 255, 0.1); color: var(--cyan); cursor: pointer; font-size: 0.85rem; font-family: 'Jua'; z-index: 1000; }
+
+        nav { display: flex; justify-content: center; padding: 3px; gap: 10px; flex-shrink: 0; z-index: 10; }
+        .nav-btn { padding: 10px 18px; border: none; background: rgba(255,255,255,0.1); color: #aaa; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-weight: bold; }
+        .nav-btn.active { background: #fff; color: var(--navy-deep); box-shadow: 0 0 10px #fff; }
+
+        .sub-nav { display: flex; justify-content: center; gap: 10px; margin-top: 5px; flex-shrink: 0; z-index: 10; }
+        .sub-btn { padding: 6px 15px; border-radius: 20px; border: 1px solid var(--magenta); background: rgba(255, 46, 247, 0.1); color: var(--magenta); font-family: 'Jua', sans-serif; cursor: pointer; font-size: 0.85rem; }
+        .sub-btn.active { background: var(--magenta); color: white; }
+
+        .info-section { display: flex; gap: 12px; padding: 0 15px; margin: 8px 0; height: 135px; flex-shrink: 0; z-index: 10; }
+        .cat-box { flex: 1.5; display: flex; align-items: flex-end; gap: 12px; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 25px; border: 2px solid var(--glass); }
+        .cat-character { width: 70px; filter: drop-shadow(0 0 8px var(--cyan)); }
+        .dialogue { flex: 1; font-size: 1.1rem; line-height: 1.6; font-family: 'Jua', sans-serif; color: #f8f8f8; overflow-y: auto; }
+        .dialogue b { color: var(--yellow); }
+
+        .data-header-panel { flex: 1.6; display: flex; flex-direction: column; gap: 6px; }
+        .data-row { display: flex; gap: 6px; flex: 1; }
+        .data-item { background: var(--navy-mid); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 5px; flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+        .data-label { font-size: 0.65rem; color: #aaa; font-weight: bold; }
+        .data-val { font-size: 1.1rem; font-weight: bold; color: var(--yellow); font-family: monospace; }
+
+        main { flex: 1; display: grid; grid-template-columns: 1fr 280px; gap: 15px; padding: 0 15px; min-height: 0; position: relative; z-index: 5; }
+        .game-view { background: #000; border-radius: 35px; border: 3px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+        
+        .record-room { background: var(--navy-mid); border-radius: 25px; border: 2px solid var(--magenta); padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+        .record-room h3 { margin: 0; font-family: 'Jua'; font-size: 1.3rem; color: var(--magenta); text-align: center; border-bottom: 1px solid var(--glass); padding-bottom: 5px; }
+        #log-list { flex: 1; overflow-y: auto; font-size: 0.85rem; color: #ccc; }
+        .log-item { padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.3); margin-bottom: 8px; border-left: 5px solid var(--cyan); line-height: 1.4; }
+
+        canvas { width: 100%; height: 100%; display: block; }
+
+        #result-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
+        .result-box { background: var(--navy-mid); padding: 40px; border-radius: 30px; border: 5px solid var(--cyan); min-width: 380px; }
+
+        .controls { padding: 15px 25px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; background: rgba(0,0,0,0.8); border-top: 3px solid var(--glass); z-index: 10; }
+        .control-row { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; }
+        
+        .option-group { display: flex; gap: 15px; flex: 2; }
+        .opt-btn { padding: 12px 25px; border-radius: 15px; border: 2px solid var(--cyan); background: rgba(0,247,255,0.1); color: var(--cyan); font-family: 'Jua'; cursor: pointer; transition: 0.2s; font-size: 1.2rem; flex: 1; }
+        .opt-btn.active { background: var(--cyan); color: #000; font-weight: bold; box-shadow: 0 0 20px var(--cyan); }
+
+        .btn-drop { background: linear-gradient(to right, var(--cyan), var(--magenta)); color: #fff; flex: 2; padding: 20px; border: none; border-radius: 60px; font-family: 'Jua'; font-size: 2rem; cursor: pointer; box-shadow: 0 0 30px rgba(0,247,255,0.5); }
+        .btn-drop:disabled { opacity: 0.3; }
+        .btn-reset { background: #334155; color: #fff; width: 120px; font-family: 'Jua'; border:none; border-radius:60px; cursor:pointer; height:70px; font-size: 1.3rem; }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="game-body">
+    <header>
+        <button class="fs-btn" id="fullBtn">전체화면</button>
+        <div class="top-slogan">🎶 나도 어디서 꿀리지 않아~ GD(Gravity Deliverer)! 🎶</div>
+        <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
+    </header>
+
+    <nav>
+        <button class="nav-btn">🛸 신입 기사 훈련소</button>
+        <button class="nav-btn">🎬 GD’s Motion Lab</button>
+        <button class="nav-btn active">📦 배송 미션</button>
+        <button class="nav-btn">📒 업무 매뉴얼</button>
+        <button class="nav-btn">🪪 GD 자격증</button>
+    </nav>
+
+    <div class="sub-nav">
+        <button class="sub-btn active">🚀 M1. 속력 대결</button>
+        <button class="sub-btn" style="opacity: 0.4;">📏 M2. 높이 대결 (준비중)</button>
+    </div>
+
+    <div class="info-section">
+        <div class="cat-box">
+            <svg class="cat-character" viewBox="0 0 100 120">
+                <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="#00f7ff" stroke-width="2"/>
+                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/><circle cx="50" cy="45" r="25" fill="#f8fafc"/>
+                <circle cx="42" cy="42" r="3" fill="#000"/><circle cx="58" cy="42" r="3" fill="#000"/>
+                <path d="M48 50 Q50 55 52 50" stroke="#000" fill="none" stroke-width="2"/>
+                <rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/><text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
+            </svg>
+            <div class="dialogue" id="msg-box">
+                안녕! 🐱 <b>냥디</b>다냥! <br> 
+                속력을 바꿔가며 택배를 배송해보라냥! <span style="color:var(--magenta)">배송 기록실</span>에 네 흔적을 남겨줄게냥. <br>
+                <b>3가지 속력</b>으로 모두 성공하면 마스터 인정이다냥! 렛츠 기릿~
+            </div>
+        </div>
+        
+        <div class="data-header-panel">
+            <div class="data-row">
+                <div class="data-item"><div class="data-label">⏱ 택배 도착 시간</div><div class="data-val" id="hit-t">-</div></div>
+                <div class="data-item"><div class="data-label">🏆 합계 스코어</div><div class="data-val" id="score-text">0</div></div>
+            </div>
+            <div class="data-row">
+                <div class="data-item"><div class="data-label">📐 낙하 높이</div><div class="data-val" id="ha-val">10.0m</div></div>
+                <div class="data-item"><div class="data-label">📏 수평 도달 거리</div><div class="data-val" id="dist-val">0.0 m</div></div>
+                <div class="data-item"><div class="data-label">🔥 마스터 달성</div><div class="data-val" id="master-text">0/3</div></div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div id="result-overlay">
+            <div class="result-box">
+                <h2 id="res-title" style="font-family:'Jua'; color:var(--cyan); font-size:3rem; margin:0;">PERFECT!</h2>
+                <p id="res-msg" style="font-family:'Jua'; color:#fff; font-size:1.4rem; margin:20px 0; line-height:1.5;"></p>
+                <button class="btn-drop" style="font-size:1.2rem; height:auto; padding:15px 40px;" onclick="resetLevel()">다음 도전!</button>
+            </div>
+        </div>
+        <div class="game-view" id="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        <aside class="record-room">
+            <h3>📦 배송 기록실</h3>
+            <div id="log-list">기록이 없습니다.</div>
+        </aside>
+    </main>
+
+    <div class="controls">
+        <div class="control-row">
+            <div class="option-group">
+                <button class="opt-btn active" onclick="setSpeed(1, this)">v (느림)</button>
+                <button class="opt-btn" onclick="setSpeed(2, this)">2v (보통)</button>
+                <button class="opt-btn" onclick="setSpeed(3, this)">3v (빠름)</button>
+            </div>
+            <button class="btn-drop" id="drop-btn" onclick="startDrop()">📦 DROP THE BEAT (투하!)</button>
+            <button class="btn-reset" onclick="fullReset()">리셋</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const fullBtn = document.getElementById('fullBtn');
+    const dropBtn = document.getElementById('drop-btn');
+    const resOverlay = document.getElementById('result-overlay');
+    const logList = document.getElementById('log-list');
+
+    let isFalling = false, time = 0, groundY;
+    let score = 0, masterFlags = [false, false, false];
+    
+    let ship = { x: -200, y: 120, vx: 4 };
+    let parcel = { x: 0, y: 0, vx: 0, vy: 0, active: false, startX: 0, color: '#ff2ef7' };
+    let target = { x: 0, width: 160 };
+    let archivedPaths = []; 
+    let currentPath = [];
+    const G = 0.15;
+
+    const spdMap = { 1: 4.0, 2: 7.5, 3: 11.0 };
+    const colorMap = { 1: '#00f7ff', 2: '#fff200', 3: '#ff2ef7' };
+    let selectedIdx = 1;
+
+    fullBtn.addEventListener('click', () => {
+        const body = document.documentElement;
+        if (!document.fullscreenElement) {
+            if (body.requestFullscreen) body.requestFullscreen();
+            else if (body.webkitRequestFullscreen) body.webkitRequestFullscreen();
+            fullBtn.innerText = "화면 복귀";
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            fullBtn.innerText = "전체화면";
+        }
+    });
+
+    function setSpeed(v, btn) {
+        if (isFalling) return;
+        selectedIdx = v;
+        document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ship.vx = spdMap[v];
+        resetLevel();
+    }
+
+    // [전체 리셋 기능]
+    function fullReset() {
+        score = 0;
+        masterFlags = [false, false, false];
+        archivedPaths = [];
+        logList.innerHTML = '기록이 없습니다.';
+        document.getElementById('score-text').innerText = "0";
+        document.getElementById('master-text').innerText = "0/3";
+        resetLevel();
+    }
+
+    function resetLevel() {
+        resOverlay.style.display = 'none';
+        isFalling = false;
+        parcel.active = false;
+        currentPath = [];
+        ship.x = -200;
+        time = 0;
+        dropBtn.disabled = false;
+        document.getElementById('hit-t').innerText = "-";
+        document.getElementById('ha-val').innerText = "10.0m";
+        document.getElementById('dist-val').innerText = "0.0 m";
+        groundY = canvas.height - 40;
+        target.x = canvas.width * 0.45 + Math.random() * (canvas.width * 0.35);
+    }
+
+    function startDrop() {
+        if (isFalling) return;
+        isFalling = true;
+        dropBtn.disabled = true;
+        parcel.active = true;
+        parcel.x = ship.x + 60;
+        parcel.y = ship.y + 40;
+        parcel.vx = ship.vx;
+        parcel.vy = 0;
+        parcel.startX = parcel.x;
+        parcel.color = colorMap[selectedIdx];
+    }
+
+    function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#1e1b4b";
+        ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(150, groundY-80); ctx.lineTo(400, groundY-150); ctx.lineTo(canvas.width, groundY-70); ctx.lineTo(canvas.width, groundY); ctx.fill();
+        ctx.fillStyle = "#334155"; ctx.fillRect(0, groundY, canvas.width, 40);
+
+        archivedPaths.forEach(path => {
+            ctx.strokeStyle = path.color; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            path.points.forEach((p, i) => { if(i===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+            ctx.stroke();
+        });
+        ctx.setLineDash([]);
+
+        ctx.font = "80px serif"; ctx.textAlign = "center";
+        ctx.fillText("🏠", target.x + 80, groundY - 5);
+
+        if (!isFalling) {
+            ship.x += ship.vx;
+            if (ship.x > canvas.width + 200) ship.x = -200;
+            ctx.fillText("🛸", ship.x + 60, ship.y + 50);
+        }
+
+        if (parcel.active) {
+            parcel.vy += G; parcel.y += parcel.vy; parcel.x += parcel.vx;
+            time += 1/60;
+            currentPath.push({ x: parcel.x, y: parcel.y });
+
+            ctx.fillStyle = parcel.color;
+            ctx.beginPath(); ctx.arc(parcel.x, parcel.y, 8, 0, Math.PI*2); ctx.fill();
+            ctx.font = "50px serif"; ctx.fillText("📦", parcel.x, parcel.y + 15);
+
+            document.getElementById('ha-val').innerText = Math.max(0, (groundY - parcel.y)/20).toFixed(1) + "m";
+            document.getElementById('dist-val').innerText = ((parcel.x - parcel.startX)/20).toFixed(1) + "m";
+
+            if (parcel.y >= groundY - 15) {
+                parcel.active = false; parcel.y = groundY - 15;
+                document.getElementById('hit-t').innerText = time.toFixed(3) + "s";
+                checkResult(parcel.x);
+            }
+        }
+        requestAnimationFrame(loop);
+    }
+
+    function checkResult(hitX) {
+        resOverlay.style.display = 'flex';
+        const center = target.x + 80;
+        const dist = Math.abs(hitX - center);
+        const type = (dist < 45) ? 'PERFECT' : (hitX >= target.x && hitX <= target.x + 160 ? 'SUCCESS' : 'MISS');
+        
+        const title = document.getElementById('res-title');
+        const msg = document.getElementById('res-msg');
+        const spdLabel = selectedIdx === 1 ? 'v(느림)' : (selectedIdx === 2 ? '2v(보통)' : '3v(빠름)');
+
+        if (type !== 'MISS') {
+            score += (type === 'PERFECT' ? 100 : 50);
+            masterFlags[selectedIdx - 1] = true;
+            archivedPaths.push({ points: [...currentPath], color: parcel.color });
+            title.innerText = type === 'PERFECT' ? "🎯 PERFECT!" : "✅ SUCCESS!";
+            title.style.color = type === 'PERFECT' ? "#00f7ff" : "#fff200";
+            msg.innerText = "안전 배송 성공이다냥! \n 속력이 빠를수록 택배가 더 멀리 간다는 걸 알겠냥?";
+        } else {
+            title.innerText = "❌ MISS..."; title.style.color = "#ff2ef7";
+            if (hitX < target.x) msg.innerText = "아깝다냥! 속력이 느리면 택배가 멀리 못 간다냥. \n 다음엔 타겟에 더 가까워졌을 때 던져봐냥!";
+            else msg.innerText = "너무 멀리 갔다냥! 속력이 빠르면 훨씬 미리 던져야 한다냥!";
+        }
+
+        updateLog(spdLabel, type, ((hitX - parcel.startX)/20).toFixed(1) + "m", parcel.color);
+    }
+
+    function updateLog(spd, res, dist, color) {
+        if (logList.innerText.includes('없습니다')) logList.innerHTML = '';
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        item.style.borderLeft = `5px solid ${color}`;
+        item.innerHTML = `[${spd}] 결과: <b>${res}</b><br>거리: ${dist}`;
+        logList.prepend(item);
+        document.getElementById('score-text').innerText = score;
+        document.getElementById('master-text').innerText = masterFlags.filter(f => f).length + "/3";
+    }
+
+    function init() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        resetLevel();
+    }
+    
+    window.onload = init;
+    window.onresize = init;
+    requestAnimationFrame(loop);
+</script>
+</body>
+</html>

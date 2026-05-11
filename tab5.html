@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Deliverer - M2</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
+
+        :root {
+            --navy-deep: #020617;
+            --navy-mid: #0f172a;
+            --cyan: #00f7ff;
+            --magenta: #ff2ef7;
+            --yellow: #fff200;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--navy-deep); color: var(--white); font-family: 'Nanum Gothic', sans-serif; overflow: hidden; }
+
+        .app-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; padding: 10px; }
+
+        /* [사진과 동일한 헤더 및 탭 명칭] */
+        header { text-align: center; flex-shrink: 0; padding-bottom: 5px; position: relative; }
+        header .slogan { font-size: 1rem; color: #ffccff; font-family: 'Jua'; margin-bottom: 5px; }
+        header h1 { margin: 0; font-size: 2.5rem; font-family: 'Jua'; color: var(--cyan); letter-spacing: 1px; }
+        .fs-btn { position: absolute; right: 10px; top: 10px; padding: 8px 15px; border-radius: 10px; border: 1px solid var(--cyan); background: rgba(0,247,255,0.1); color: var(--cyan); cursor: pointer; font-family: 'Jua'; z-index: 1000; font-size: 0.8rem; }
+
+        nav { display: flex; justify-content: center; gap: 8px; flex-shrink: 0; margin-bottom: 8px; }
+        .nav-btn { padding: 10px 18px; border: none; background: rgba(255,255,255,0.1); color: #aaa; border-radius: 12px; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
+        .nav-btn.active { background: #fff; color: var(--navy-deep); box-shadow: 0 0 15px #fff; }
+
+        .sub-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        .sub-btn { padding: 5px 15px; border-radius: 20px; border: 1px solid var(--magenta); background: rgba(255,46,247,0.1); color: var(--magenta); font-family: 'Jua'; cursor: pointer; font-size: 0.85rem; }
+        .sub-btn.active { background: var(--magenta); color: white; box-shadow: 0 0 10px var(--magenta); }
+
+        /* 정보 영역 */
+        .info-section { display: grid; grid-template-columns: 1.6fr 0.7fr 1.2fr; gap: 12px; margin-bottom: 10px; height: 160px; flex-shrink: 0; }
+        
+        .cat-box { background: rgba(0,0,0,0.6); padding: 12px; border-radius: 25px; border: 2px solid var(--glass); display: flex; align-items: flex-end; gap: 12px; }
+        .cat-character { width: 65px; filter: drop-shadow(0 0 8px var(--cyan)); }
+        
+        /* 냥디 대사 강조 */
+        .dialogue { flex: 1; font-size: 1.15rem; line-height: 1.35; font-family: 'Jua'; color: #eee; overflow-y: auto; }
+        .dialogue b { color: var(--yellow); text-decoration: none; border-bottom: 2px solid var(--yellow); }
+        .em { font-size: 1.6rem; vertical-align: middle; margin: 0 2px; }
+
+        .speed-panel { background: #000; border: 3px solid var(--yellow); border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(255,242,0,0.2); position: relative; overflow: hidden; }
+        .speed-panel .val { font-family: 'Jua'; font-size: 3rem; color: var(--yellow); line-height: 1; margin-top: -10px; }
+        .speed-panel .lbl { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: 0.65rem; background: var(--yellow); color: #000; font-weight: bold; padding: 4px 0; white-space: nowrap; }
+
+        /* 데이터 카드 (5칸) */
+        .data-panel { display: grid; grid-template-rows: 1fr 1.2fr; gap: 5px; }
+        .data-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .data-row.triple { grid-template-columns: 1fr 1fr 0.8fr; }
+        .data-card { background: var(--navy-mid); border: 1px solid var(--glass); border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
+        .data-card label { font-size: 0.65rem; color: #888; font-weight: bold; }
+        .data-card span { font-size: 1rem; font-weight: bold; color: var(--yellow); font-family: monospace; }
+
+        /* 메인 영역 */
+        main { flex: 1; display: grid; grid-template-columns: 1fr 280px; gap: 12px; padding: 0 5px; min-height: 0; }
+        .game-view { background: linear-gradient(to bottom, #020617, #1e1b4b); border-radius: 35px; border: 2px solid var(--glass); position: relative; overflow: hidden; }
+        canvas { width: 100%; height: 100%; display: block; }
+        
+        .record-room { background: var(--navy-mid); border: 2px solid var(--magenta); border-radius: 25px; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .record-room h3 { margin: 0; font-family: 'Jua'; font-size: 1.2rem; color: var(--magenta); text-align: center; border-bottom: 1px solid var(--glass); padding-bottom: 8px; }
+        #log-list { flex: 1; overflow-y: auto; font-size: 0.82rem; color: #ccc; }
+        .log-item { padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); margin-bottom: 8px; border-left: 5px solid var(--cyan); line-height: 1.5; }
+        .log-item .tag { color: var(--magenta); font-weight: bold; font-family: 'Jua'; }
+
+        /* 조작부 */
+        .controls { padding: 15px 30px; flex-shrink: 0; background: rgba(0,0,0,0.8); border-top: 2px solid var(--glass); display: flex; align-items: center; gap: 20px; }
+        .option-btns { display: flex; gap: 10px; flex: 1.5; }
+        .opt-btn { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid var(--cyan); background: transparent; color: var(--cyan); font-family: 'Jua'; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .opt-btn.active { background: var(--cyan); color: #000; box-shadow: 0 0 15px var(--cyan); }
+        .btn-drop { flex: 2; padding: 18px; border-radius: 50px; border: none; background: linear-gradient(to right, var(--cyan), var(--magenta)); color: #fff; font-family: 'Jua'; font-size: 1.8rem; cursor: pointer; box-shadow: 0 0 25px rgba(0,247,255,0.4); }
+        .btn-drop:disabled { opacity: 0.3; }
+        .btn-reset { width: 110px; padding: 18px; border-radius: 50px; border: none; background: #334155; color: #fff; font-family: 'Jua'; font-size: 1.1rem; cursor: pointer; }
+
+        #res-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
+        .res-box { background: var(--navy-mid); padding: 40px; border-radius: 30px; border: 5px solid var(--cyan); min-width: 380px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="game-app">
+    <header>
+        <button class="fs-btn" onclick="toggleFS()">전체화면</button>
+        <div class="top-slogan">🎶 나도 어디서 꿀리지 않아~ GD(Gravity Deliverer)! 🎶</div>
+        <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
+    </header>
+
+    <nav>
+        <button class="nav-btn">신입 기사 훈련소</button>
+        <button class="nav-btn">GD's Motion Lab</button>
+        <button class="nav-btn active">배송 미션</button>
+        <button class="nav-btn">업무 매뉴얼</button>
+        <button class="nav-btn">GD 자격증</button>
+    </nav>
+
+    <div class="sub-nav">
+        <button class="sub-btn">🚀 M1. 속력 대결</button>
+        <button class="sub-btn active">📏 M2. 높이 대결</button>
+        <button class="sub-btn" style="opacity:0.4">👯 M3. 동시 배송</button>
+    </div>
+
+    <div class="info-section">
+        <div class="cat-box">
+            <svg class="cat-character" viewBox="0 0 100 120">
+                <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="#00f7ff" stroke-width="2"/>
+                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/><circle cx="50" cy="45" r="25" fill="#f8fafc"/>
+                <circle cx="42" cy="42" r="3" fill="#000"/><circle cx="58" cy="42" r="3" fill="#000"/>
+                <path d="M48 50 Q50 55 52 50" stroke="#000" fill="none" stroke-width="2"/>
+                <rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/><text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
+            </svg>
+            <div class="dialogue">
+                Yo~ 훈련소 대장 <span class="em">🐱</span><b>냥디</b>다냥! <span class="em">🚀</span><br> 
+                M2 미션은 📏<b>높이 대결</b>이다냥! 옆으로 가는 속력은 내가 꽉 잡아놨으니 안심하라냥! <span class="em">🔒</span><br>
+                높이가 달라지면 ⏱<b>낙하 시간</b>이 변한다냥! <b class="highlight-line">높을수록 낙하 시간이 길어서 수평으로 멀리간다</b>는 것을 꼭 기억하라냥! 렛츠 기릿~냥! <span class="em">🐾</span>
+            </div>
+        </div>
+        <div class="speed-panel">
+            <div class="val">7.5</div>
+            <div class="lbl">수평 속력 일정 (FIXED)</div>
+        </div>
+        <div class="data-panel">
+            <div class="data-row">
+                <div class="data-card"><label>⏱ 도착 시간</label><span id="hit-t">-</span></div>
+                <div class="data-card"><label>🏆 합계 점수</label><span id="score-text">0</span></div>
+            </div>
+            <div class="data-row triple">
+                <div class="data-card"><label>📐 시작 높이</label><span id="ha-val">11.0m</span></div>
+                <div class="data-card"><label>🚀 도달 거리</label><span id="dist-val">0.0m</span></div>
+                <div class="data-card"><label>🔥 마스터</label><span id="master-text">0/3</span></div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="game-view" id="canvas-container">
+            <div id="res-overlay">
+                <div class="res-box">
+                    <h2 id="res-title" style="font-family:'Jua'; color:var(--cyan); font-size:3rem; margin:0;">PERFECT!</h2>
+                    <p id="res-msg" style="font-family:'Jua'; color:#fff; font-size:1.3rem; margin:20px 0;"></p>
+                    <button class="btn-drop" style="font-size:1.2rem; height:auto; padding:12px 30px;" onclick="resetGame()">다음 도전!</button>
+                </div>
+            </div>
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        <aside class="record-room">
+            <h3>📦 배송 기록실</h3>
+            <div id="log-list">기록이 없습니다.</div>
+        </aside>
+    </main>
+
+    <div class="controls">
+        <div class="option-btns">
+            <button class="opt-btn" onclick="setH(1, this)">h (낮음)</button>
+            <button class="opt-btn active" onclick="setH(2, this)">2h (보통)</button>
+            <button class="opt-btn" onclick="setH(3, this)">3h (높음)</button>
+        </div>
+        <button class="btn-drop" id="drop-btn" onclick="startDrop()">📦 DROP THE BEAT!</button>
+        <button class="btn-reset" onclick="fullReset()">리셋</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const resOverlay = document.getElementById('res-overlay');
+    const dropBtn = document.getElementById('drop-btn');
+    const logList = document.getElementById('log-list');
+
+    // 물리 및 상태 변수
+    let state = "READY"; 
+    let score = 0;
+    let master = [false, false, false];
+    let time = 0;
+    let groundY;
+
+    const G = 0.16;
+    const FIXED_VX = 7.5;
+    const hMap = { 1: 5, 2: 12, 3: 20 };
+    const colorMap = { 1: '#00f7ff', 2: '#fff200', 3: '#ff2ef7' };
+    const labelMap = { 1: 'h (낮음)', 2: '2h (보통)', 3: '3h (높음)' };
+    let selIdx = 2;
+
+    let ship = { x: -200, y: 0, vx: FIXED_VX, h: hMap[2] };
+    let parcel = { x: 0, y: 0, vx: 0, vy: 0, active: false, startX: 0, color: colorMap[2] };
+    let target = { x: 0, width: 140 };
+    let paths = []; 
+    let currentTrace = [];
+
+    function toggleFS() {
+        const body = document.documentElement;
+        if (!document.fullscreenElement) {
+            if (body.requestFullscreen) body.requestFullscreen();
+            else if (body.webkitRequestFullscreen) body.webkitRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    function setH(idx, btn) {
+        if (state === "FALLING") return;
+        selIdx = idx;
+        document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ship.h = hMap[idx];
+        resetGame();
+    }
+
+    function fullReset() {
+        score = 0; master = [false, false, false]; paths = [];
+        logList.innerHTML = '기록이 없습니다.';
+        document.getElementById('score-text').innerText = "0";
+        document.getElementById('master-text').innerText = "0/3";
+        resetGame();
+    }
+
+    function resetGame() {
+        resOverlay.style.display = 'none';
+        state = "READY";
+        parcel.active = false;
+        currentTrace = [];
+        ship.x = -200;
+        time = 0;
+        dropBtn.disabled = false;
+        document.getElementById('hit-t').innerText = "-";
+        document.getElementById('ha-val').innerText = ship.h.toFixed(1) + "m";
+        document.getElementById('dist-val').innerText = "0.0m";
+        
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        groundY = canvas.height - 40;
+        
+        // 타겟 위치
+        target.x = canvas.width * 0.35 + Math.random() * (canvas.width * 0.4);
+        // 높이 보정
+        ship.y = groundY - (ship.h * 15) - 80;
+    }
+
+    function startDrop() {
+        if (state !== "READY") return;
+        state = "FALLING";
+        dropBtn.disabled = true;
+        parcel.active = true;
+        parcel.x = ship.x + 60;
+        parcel.y = ship.y + 40;
+        parcel.vx = ship.vx;
+        parcel.vy = 0;
+        parcel.startX = parcel.x;
+        parcel.color = colorMap[selIdx];
+    }
+
+    function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        groundY = canvas.height - 40;
+
+        // 1. 배경 및 도로
+        ctx.fillStyle = "#1e1b4b";
+        ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(150, groundY-60); ctx.lineTo(400, groundY-120); ctx.lineTo(canvas.width, groundY-50); ctx.lineTo(canvas.width, groundY); ctx.fill();
+        ctx.fillStyle = "#334155"; ctx.fillRect(0, groundY, canvas.width, 40);
+
+        // 2. 과거 궤적
+        paths.forEach(p => {
+            ctx.strokeStyle = p.color; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            p.points.forEach((pt, i) => { if(i===0) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y); });
+            ctx.stroke();
+        });
+        ctx.setLineDash([]);
+
+        // 3. 타겟 🏠 (강제 폰트 설정)
+        ctx.font = "70px serif"; ctx.textAlign = "center";
+        ctx.fillText("🏠", target.x + 70, groundY - 5);
+
+        // 4. 우주선 🛸 (강제 폰트 설정)
+        if (state === "READY") {
+            ship.x += ship.vx;
+            if (ship.x > canvas.width + 150) ship.x = -200;
+        }
+        ctx.font = "65px serif";
+        ctx.fillText("🛸", ship.x + 60, ship.y + 50);
+
+        // 5. 택배 📦 (강제 폰트 설정)
+        if (parcel.active) {
+            parcel.vy += G; parcel.y += parcel.vy; parcel.x += parcel.vx;
+            time += 1/60;s 
+            currentTrace.push({ x: parcel.x, y: parcel.y });
+
+            ctx.fillStyle = parcel.color;
+            ctx.beginPath(); ctx.arc(parcel.x, parcel.y, 8, 0, Math.PI*2); ctx.fill();
+            
+            ctx.font = "45px serif";
+            ctx.fillText("📦", parcel.x, parcel.y + 15);
+
+            document.getElementById('ha-val').innerText = Math.max(0, (groundY - parcel.y)/15).toFixed(1) + "m";
+            document.getElementById('dist-val').innerText = ((parcel.x - parcel.startX)/20).toFixed(1) + "m";
+
+            if (parcel.y >= groundY - 15) {
+                parcel.active = false; parcel.y = groundY - 15;
+                document.getElementById('hit-t').innerText = time.toFixed(3) + "s";
+                checkResult(parcel.x);
+            }
+        }
+        requestAnimationFrame(loop);
+    }
+
+    function checkResult(hitX) {
+        state = "RESULT";
+        const dist = Math.abs(hitX - (target.x + 70));
+        const type = (dist < 45) ? 'PERFECT' : (hitX >= target.x && hitX <= target.x + 140 ? 'SUCCESS' : 'MISS');
+        
+        resOverlay.style.display = 'flex';
+        const title = document.getElementById('res-title');
+        const msg = document.getElementById('res-msg');
+        
+        if (type !== 'MISS') {
+            score += (type === 'PERFECT' ? 100 : 50);
+            master[selIdx - 1] = true;
+            paths.push({ points: [...currentTrace], color: parcel.color });
+            title.innerText = type === 'PERFECT' ? "🎯 PERFECT!" : "✅ SUCCESS!";
+            title.style.color = type === 'PERFECT' ? "#00f7ff" : "#fff200";
+            msg.innerText = "배송 성공이다냥! ⏱ \n 높이 날수록 낙하 시간이 길어져서 \n 수평으로 더 멀리 간다는 걸 알겠냥? 🚀";
+        } else {
+            title.innerText = "❌ MISS..."; title.style.color = "#ff2ef7";
+            msg.innerText = hitX < target.x ? "아깝다냥! 높이가 낮으면 금방 바닥에 닿는다냥! ⏱" : "너무 멀리 갔다냥! 높이 날수록 공중에 오래 떠 있는다냥! ⏱";
+        }
+
+        if (logList.innerText.includes('없습니다')) logList.innerHTML = '';
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        item.style.borderLeft = `5px solid ${parcel.color}`;
+        item.innerHTML = `<span class="tag"># ${labelMap[selIdx]}</span> <b>${type}</b><br>⏱ ${time.toFixed(3)}s | 🚀 ${((hitX - parcel.startX)/20).toFixed(1)}m`;
+        logList.prepend(item);
+        
+        document.getElementById('score-text').innerText = score;
+        document.getElementById('master-text').innerText = master.filter(f => f).length + "/3";
+    }
+
+    window.onload = () => {
+        resetGame();
+        loop();
+    };
+    window.onresize = resetGame;
+</script>
+</body>
+</html>

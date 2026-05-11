@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Deliverer - M3</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&family=Gaegu:wght@700&display=swap');
+
+        :root {
+            --navy-deep: #020617;
+            --navy-mid: #0f172a;
+            --cyan: #00f7ff;
+            --magenta: #ff2ef7;
+            --yellow: #fff200;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--navy-deep); color: var(--white); font-family: 'Nanum Gothic', sans-serif; overflow: hidden; }
+
+        .app-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; padding: 5px; overflow: hidden; }
+
+        header { padding: 10px 0 5px; text-align: center; position: relative; flex-shrink: 0; }
+        header .top-slogan { font-size: 1.1rem; color: #ffccff; font-weight: bold; font-family: 'Jua'; margin-bottom: 5px; text-shadow: 0 0 10px var(--magenta); }
+        header h1 { margin: 0; font-size: 3rem; font-family: 'Gaegu', cursive; color: var(--cyan); letter-spacing: 1px; }
+        .fs-btn { position: absolute; right: 20px; top: 10px; padding: 8px 15px; border-radius: 10px; border: 1px solid var(--cyan); background: rgba(0, 247, 255, 0.1); color: var(--cyan); cursor: pointer; font-family: 'Jua'; z-index: 1000; font-size: 0.85rem; }
+
+        nav { display: flex; justify-content: center; gap: 8px; flex-shrink: 0; margin-bottom: 5px; }
+        .nav-btn { padding: 10px 18px; border: none; background: var(--glass); color: #aaa; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-weight: bold; }
+        .nav-btn.active { background: #fff; color: var(--navy-deep); box-shadow: 0 0 15px #fff; }
+
+        .sub-nav { display: flex; justify-content: center; gap: 10px; margin-top: 5px; flex-shrink: 0; }
+        .sub-btn { padding: 5px 15px; border-radius: 20px; border: 1px solid var(--magenta); background: rgba(255, 46, 247, 0.1); color: var(--magenta); font-family: 'Jua', sans-serif; cursor: pointer; font-size: 0.85rem; }
+        .sub-btn.active { background: var(--magenta); color: white; }
+
+        /* 정보 패널 */
+        .info-section { display: grid; grid-template-columns: 1.8fr 1fr 1fr; gap: 12px; padding: 0 15px; margin: 8px 0; height: 165px; flex-shrink: 0; }
+        .cat-box { background: rgba(0,0,0,0.65); padding: 15px; border-radius: 25px; border: 2px solid var(--glass); display: flex; align-items: flex-end; gap: 12px; }
+        .cat-character { width: 70px; filter: drop-shadow(0 0 8px var(--cyan)); }
+        .dialogue { flex: 1; font-size: 1rem; line-height: 1.35; font-family: 'Jua'; color: #f8f8f8; overflow-y: auto; }
+        .dialogue b { color: var(--yellow); border-bottom: 2px solid var(--yellow); }
+
+        /* [수정] 자물쇠 전광판 스타일 */
+        .time-board { 
+            background: #000; border: 3px solid var(--cyan); border-radius: 20px; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            padding: 10px; position: relative; transition: 0.3s;
+        }
+        .time-board .label { font-size: 0.65rem; color: var(--cyan); font-weight: bold; margin-bottom: 3px; }
+        .time-board .val { font-family: 'Jua'; font-size: 2.2rem; color: var(--yellow); line-height: 1; }
+        .time-board .sub-msg { font-size: 0.6rem; color: #888; margin-top: 5px; }
+        .lock-icon { position: absolute; top: 10px; right: 12px; font-size: 1.4rem; filter: drop-shadow(0 0 5px var(--yellow)); }
+        
+        /* 슬라이더 움직일 때 깜빡임 효과 */
+        .flash-warning { background: rgba(255, 242, 0, 0.2) !important; border-color: var(--yellow) !important; transform: scale(1.05); }
+
+        /* 메인 게임 및 기록실 */
+        main { flex: 1; display: grid; grid-template-columns: 1fr 280px; gap: 12px; padding: 0 10px; min-height: 0; position: relative; }
+        .game-view { background: #000; border-radius: 35px; border: 2px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+        canvas { width: 100%; height: 100%; display: block; }
+        
+        .record-room { background: var(--navy-mid); border: 2px solid var(--magenta); border-radius: 25px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+        .record-room h3 { margin: 0; font-family: 'Jua'; font-size: 1.2rem; color: var(--magenta); text-align: center; border-bottom: 1px solid var(--glass); padding-bottom: 8px; }
+        #log-list { flex: 1; overflow-y: auto; font-size: 0.82rem; color: #ccc; }
+        .log-item { padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); margin-bottom: 8px; border-left: 5px solid var(--cyan); line-height: 1.4; }
+
+        /* 하단 컨트롤 */
+        .controls { padding: 10px 25px 20px; flex-shrink: 0; background: rgba(0,0,0,0.8); border-top: 2px solid var(--glass); display: flex; align-items: center; gap: 10px; }
+        .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 100%; }
+        .slider-wrap { display: flex; align-items: center; gap: 10px; color: var(--cyan); font-weight: bold; font-size: 0.9rem; font-family: 'Jua'; }
+        input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; height: 8px; }
+
+        .btn-row { display: flex; gap: 15px; width: 100%; }
+        .btn-drop { flex: 1; padding: 16px; border-radius: 50px; border: none; color: #fff; font-family: 'Jua'; font-size: 1.3rem; cursor: pointer; transition: 0.2s; }
+        .btn-a { background: linear-gradient(to right, var(--cyan), #2563eb); box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); }
+        .btn-b { background: linear-gradient(to right, var(--magenta), #9333ea); box-shadow: 0 0 15px rgba(255, 46, 247, 0.4); }
+        .btn-drop:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-reset { width: 100px; padding: 15px; border-radius: 50px; background: #334155; color: #fff; border:none; font-family: 'Jua'; cursor: pointer; }
+
+        #res-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; text-align: center; }
+        .res-box { background: var(--navy-mid); padding: 40px; border-radius: 30px; border: 4px solid var(--cyan); min-width: 380px; }
+        
+        .metronome { position: absolute; top: 20px; left: 20px; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 50px; border: 1px solid var(--magenta); z-index: 100; }
+        .lamp { width: 12px; height: 12px; background: #333; border-radius: 50%; }
+        .lamp.active { background: var(--magenta); box-shadow: 0 0 10px var(--magenta); }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="game-app">
+    <header>
+        <button class="fs-btn" onclick="toggleFS()">전체화면</button>
+        <div class="top-slogan">🎶 나도 어디서 꿀리지 않아~ GD(Gravity Deliverer)! 🎶</div>
+        <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
+    </header>
+
+    <nav>
+        <button class="nav-btn">🛸 신입 기사 훈련소</button>
+        <button class="nav-btn">🎬 GD's Motion Lab</button>
+        <button class="nav-btn active">배송 미션</button>
+        <button class="nav-btn">📒 업무 매뉴얼</button>
+        <button class="nav-btn">🪪 GD 자격증</button>
+    </nav>
+
+    <div class="sub-nav">
+        <button class="sub-btn">🚀 M1. 속력 대결</button>
+        <button class="sub-btn">📏 M2. 높이 대결</button>
+        <button class="sub-btn active">👯 M3. 동시 배송</button>
+    </div>
+
+    <div class="info-section">
+        <div class="cat-box">
+            <svg class="cat-character" viewBox="0 0 100 120">
+                <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="#00f7ff" stroke-width="2"/>
+                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/><circle cx="50" cy="45" r="25" fill="#f8fafc"/><circle cx="42" cy="42" r="3" fill="#000"/><circle cx="58" cy="42" r="3" fill="#000"/><path d="M48 50 Q50 55 52 50" stroke="#000" fill="none" stroke-width="2"/><rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/><text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
+            </svg>
+            <div class="dialogue">
+                🐱 냐옹! 블루 씨🔵와 핑크 씨🔴는 사이가 아주 나쁜 이웃이다냥! <br> 
+                블루 씨는 <b>고공 경로</b>, 핑크 씨는 <b>저공 경로</b>로 택배를 받는다냥. <br>
+                <b>높이가 다르면 떨어지는 시간도 다르니</b>, 박자를 맞춰서 <b style="color:var(--yellow)">동시에</b> 도착하게 하라냥! <br>
+                🐱 속도 슬라이더를 마구 움직여봐냥! 전광판의 낙하 시간이 변하나냥? <b>절대 안 변한다냥!</b> 속력은 오직 거리만 조절할 뿐이다냥! 렛츠 기릿~
+            </div>
+        </div>
+        <!-- [수정] 자물쇠 전광판 -->
+        <div class="time-board" id="board-a">
+            <div class="lock-icon">🔒</div>
+            <div class="label">🔵 블루(고층) 낙하시간</div>
+            <div class="val">1.58s</div>
+            <div class="sub-msg">[속도와 무관 / 높이에 고정됨]</div>
+        </div>
+        <div class="time-board" id="board-b">
+            <div class="lock-icon">🔒</div>
+            <div class="label">🔴 핑크(저층) 낙하시간</div>
+            <div class="val">0.93s</div>
+            <div class="sub-msg">[속도와 무관 / 높이에 고정됨]</div>
+        </div>
+    </div>
+
+    <main>
+        <div class="game-view" id="canvas-container">
+            <div class="metronome"><div class="lamp" id="lamp"></div><div style="font-size: 0.75rem; font-weight: bold; color: var(--magenta);">RHYTHM BEAT</div></div>
+            <div id="res-overlay"><div class="res-box"><h2 id="res-title" style="font-family:'Jua'; color:var(--cyan); font-size:2.8rem; margin:0;">PERFECT!</h2><p id="res-msg" style="font-family:'Jua'; color:#fff; font-size:1.3rem; margin:20px 0; line-height:1.5;"></p><button class="btn-drop btn-a" style="font-size:1.2rem; height:auto; padding:12px 30px;" onclick="resetLevel()">다음 도전!</button></div></div>
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        <aside class="record-room"><h3>📦 배송 기록실</h3><div id="log-list">기록이 없습니다.</div></aside>
+    </main>
+
+    <div class="controls">
+        <div class="slider-row">
+            <div class="slider-wrap">🔵 블루 속력 <input type="range" id="vxa" min="2" max="15" value="7" oninput="updateParams()"></div>
+            <div class="slider-wrap">🔴 핑크 속력 <input type="range" id="vxb" min="4" max="25" value="10" oninput="updateParams()"></div>
+        </div>
+        <div class="btn-row">
+            <button class="btn-drop btn-a" id="btn-a" onclick="fire('A')">🔵 A 발사 (높음)</button>
+            <button class="btn-drop btn-b" id="btn-b" onclick="fire('B')">🔴 B 발사 (낮음)</button>
+            <button class="btn-reset" onclick="fullReset()">리셋</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const lamp = document.getElementById('lamp');
+    const logList = document.getElementById('log-list');
+
+    const V_W = 800, V_H = 500;
+    const G = 0.16;
+    const hA = 240, hB = 85; 
+    
+    let pA = { active: false, x: 0, y: 0, vx: 0, vy: 0, hit: 0, path: [] };
+    let pB = { active: false, x: 0, y: 0, vx: 0, vy: 0, hit: 0, path: [] };
+    let archivedA = [], archivedB = [];
+    let targetA = 350, targetB = 600;
+    let frames = 0, audioCtx = null;
+
+    function sx(v) { return (v / V_W) * canvas.width; }
+    function sy(v) { return (v / V_H) * canvas.height; }
+
+    function toggleFS() {
+        const app = document.getElementById('game-app');
+        if (!document.fullscreenElement) { if (app.requestFullscreen) app.requestFullscreen(); else if (app.webkitRequestFullscreen) app.webkitRequestFullscreen(); }
+        else document.exitFullscreen();
+    }
+
+    // [수정] 슬라이더 조작 시 전광판 강조 효과
+    function updateParams() {
+        const bA = document.getElementById('board-a');
+        const bB = document.getElementById('board-b');
+        bA.classList.add('flash-warning');
+        bB.classList.add('flash-warning');
+        
+        setTimeout(() => {
+            bA.classList.remove('flash-warning');
+            bB.classList.remove('flash-warning');
+        }, 400);
+
+        pA.vx = parseFloat(document.getElementById('vxa').value);
+        pB.vx = parseFloat(document.getElementById('vxb').value) * 1.5;
+    }
+
+    function resetLevel() {
+        document.getElementById('res-overlay').style.display = 'none';
+        pA.active = pB.active = false;
+        pA.path = []; pB.path = [];
+        frames = 0;
+        document.getElementById('btn-a').disabled = false;
+        document.getElementById('btn-b').disabled = false;
+        
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        
+        targetA = 300 + Math.random() * 150;
+        targetB = 550 + Math.random() * 150;
+    }
+
+    function fire(type) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const groundY = V_H - 50;
+        if (type === 'A' && !pA.active) {
+            pA = { active: true, x: 60, y: groundY - hA - 40, vx: parseFloat(document.getElementById('vxa').value), vy: 0, path: [] };
+            document.getElementById('btn-a').disabled = true;
+        } else if (type === 'B' && !pB.active) {
+            pB = { active: true, x: 60, y: groundY - hB - 40, vx: parseFloat(document.getElementById('vxb').value) * 1.5, vy: 0, path: [] };
+            document.getElementById('btn-b').disabled = true;
+        }
+    }
+
+    function playBeep() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine"; osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        lamp.classList.add('active'); setTimeout(() => lamp.classList.remove('active'), 100);
+    }
+
+    function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        frames++;
+        if (frames % 48 === 0) playBeep();
+
+        const gY = V_H - 50;
+
+        // 그리드
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)"; ctx.lineWidth = 1;
+        for (let x = 0; x < V_W; x += 50) { ctx.beginPath(); ctx.moveTo(sx(x), 0); ctx.lineTo(sx(x), sy(gY)); ctx.stroke(); }
+        for (let y = 0; y < gY; y += 40) { ctx.beginPath(); ctx.moveTo(0, sy(y)); ctx.lineTo(canvas.width, sy(y)); ctx.stroke(); }
+
+        // 도로
+        ctx.fillStyle = "#334155"; ctx.fillRect(0, sy(gY), canvas.width, sy(50));
+
+        // 과거 궤적 보존
+        ctx.setLineDash([5, 5]);
+        archivedA.forEach(path => {
+            ctx.strokeStyle = "rgba(0, 247, 255, 0.4)"; ctx.beginPath();
+            path.forEach((pt, i) => { if(i===0) ctx.moveTo(sx(pt.x), sy(pt.y)); else ctx.lineTo(sx(pt.x), sy(pt.y)); });
+            ctx.stroke();
+        });
+        archivedB.forEach(path => {
+            ctx.strokeStyle = "rgba(255, 46, 247, 0.4)"; ctx.beginPath();
+            path.forEach((pt, i) => { if(i===0) ctx.moveTo(sx(pt.x), sy(pt.y)); else ctx.lineTo(sx(pt.x), sy(pt.y)); });
+            ctx.stroke();
+        });
+        ctx.setLineDash([]);
+
+        // [복구] 🏢펜트하우스 & 🏡단독주택
+        ctx.textAlign = "center";
+        ctx.font = sy(80) + "px Arial";
+        ctx.fillText("🏢", sx(targetA), sy(gY));
+        ctx.fillText("🏡", sx(targetB), sy(gY));
+        
+        ctx.font = sy(60) + "px Arial";
+        ctx.fillText("🛸", sx(60), sy(gY - hA - 15));
+        ctx.fillText("🚀", sx(60), sy(gY - hB - 15));
+
+        const run = (p, color, icon, archive) => {
+            if (!p.active) return;
+            p.vy += G; p.y += p.vy; p.x += p.vx;
+            p.path.push({x: p.x, y: p.y});
+            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath();
+            p.path.forEach((pt, i) => { if(i===0) ctx.moveTo(sx(pt.x), sy(pt.y)); else ctx.lineTo(sx(pt.x), sy(pt.y)); });
+            ctx.stroke();
+            ctx.font = sy(40) + "px Arial"; ctx.fillText(icon, sx(p.x), sy(p.y) + 15);
+            if (p.y >= gY - 10) { p.y = gY - 10; p.active = false; p.hit = frames; archive.push([...p.path]); if(!pA.active && !pB.active) finish(); }
+        };
+        run(pA, "#00f7ff", "📦", archivedA);
+        run(pB, "#ff2ef7", "📦", archivedB);
+
+        requestAnimationFrame(loop);
+    }
+
+    function finish() {
+        if (!document.getElementById('btn-a').disabled || !document.getElementById('btn-b').disabled) return;
+        const diff = Math.abs(pA.hit - pB.hit) / 60;
+        document.getElementById('res-overlay').style.display = 'flex';
+        const title = document.getElementById('res-title'), msg = document.getElementById('res-msg');
+        if (diff < 0.12) {
+            title.innerText = "🎯 PERFECT SYNC!"; title.style.color = "#00f7ff";
+            msg.innerText = "완벽하다냥! 두 경쟁자가 동시에 택배를 받았다냥!";
+        } else {
+            title.innerText = "💢 전쟁 발발!"; title.style.color = "#ff2ef7";
+            msg.innerText = pA.hit > pB.hit ? "블루 씨가 늦어서 난리났다냥! 높은 곳은 훨씬 먼저 쏴라냥!" : "핑크 씨가 늦었다냥! 다시 박자를 맞춰보라냥!";
+        }
+        if (logList.innerText.includes('없습니다')) logList.innerHTML = '';
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        item.innerHTML = `오차: <b>${diff.toFixed(3)}s</b> | 결과: ${diff < 0.12 ? '성공' : '실패'}`;
+        logList.prepend(item);
+    }
+
+    function fullReset() { archivedA = []; archivedB = []; logList.innerHTML = '기록이 없습니다.'; resetLevel(); }
+    window.onload = () => { resetLevel(); loop(); };
+    window.onresize = resetLevel;
+</script>
+</body>
+</html>

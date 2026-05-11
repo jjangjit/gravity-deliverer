@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Deliverer - 자격증 미션 M4</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&family=Gaegu:wght@700&display=swap');
+
+        :root {
+            --navy-deep: #020617;
+            --navy-mid: #0f172a;
+            --cyan: #00f7ff;
+            --magenta: #ff2ef7;
+            --yellow: #fff200;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.15);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--navy-deep); color: var(--white); font-family: 'Nanum Gothic', sans-serif; overflow: hidden; }
+
+        .app-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; padding: 5px; }
+
+        /* 헤더 섹션: 원본 명칭 유지 */
+        header { padding: 10px 0 5px; text-align: center; position: relative; flex-shrink: 0; }
+        header .top-slogan { font-size: 1.1rem; color: #ffccff; font-weight: bold; font-family: 'Jua'; margin-bottom: 5px; text-shadow: 0 0 10px var(--magenta); }
+        header h1 { margin: 0; font-size: 2.8rem; font-family: 'Gaegu', cursive; color: var(--cyan); letter-spacing: 1px; }
+        .fs-btn { position: absolute; right: 20px; top: 10px; padding: 8px 15px; border-radius: 10px; border: 1px solid var(--cyan); background: rgba(0, 247, 255, 0.1); color: var(--cyan); cursor: pointer; font-family: 'Jua'; z-index: 1000; font-size: 0.85rem; }
+
+        /* 메인 네비게이션: 원본 명칭 유지 */
+        nav { display: flex; justify-content: center; gap: 8px; flex-shrink: 0; margin-bottom: 5px; }
+        .nav-btn { padding: 10px 18px; border: none; background: var(--glass); color: #aaa; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-weight: bold; }
+        .nav-btn.active { background: #fff; color: var(--navy-deep); box-shadow: 0 0 15px #fff; }
+
+        /* 서브 네비게이션: M1~M4 */
+        .sub-nav { display: flex; justify-content: center; gap: 10px; margin-top: 5px; flex-shrink: 0; }
+        .sub-btn { padding: 5px 15px; border-radius: 20px; border: 1px solid var(--magenta); background: rgba(255, 46, 247, 0.1); color: var(--magenta); font-family: 'Jua', sans-serif; cursor: pointer; font-size: 0.85rem; }
+        .sub-btn.active { background: var(--magenta); color: white; }
+
+        /* 정보 섹션 */
+        .info-section { display: grid; grid-template-columns: 1fr 280px; gap: 12px; padding: 0 15px; margin: 8px 0; height: 130px; flex-shrink: 0; }
+        .cat-box { background: rgba(0,0,0,0.65); padding: 15px; border-radius: 25px; border: 2px solid var(--glass); display: flex; align-items: center; gap: 15px; }
+        .cat-character { width: 65px; filter: drop-shadow(0 0 8px var(--cyan)); }
+        .dialogue { flex: 1; font-size: 1rem; line-height: 1.4; font-family: 'Jua'; color: #f8f8f8; }
+
+        /* 메인 시뮬레이션 영역 (2분할 + 기록실) */
+        main { flex: 1; display: grid; grid-template-columns: 1fr 1fr 260px; gap: 10px; padding: 0 10px; min-height: 0; position: relative; }
+        .pane { position: relative; background: #000; border-radius: 30px; border: 2px solid rgba(255,255,255,0.1); overflow: hidden; }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        .planet-tag { position: absolute; top: 15px; left: 15px; padding: 6px 15px; border-radius: 12px; font-family: 'Jua'; font-size: 1.1rem; z-index: 10; border: 2px solid; background: rgba(0,0,0,0.7); }
+        .tag-earth { color: #4ade80; border-color: #4ade80; }
+        .tag-x { color: var(--magenta); border-color: var(--magenta); }
+
+        /* 기록실 및 현장 데이터 */
+        .side-panel { background: var(--navy-mid); border: 2px solid var(--magenta); border-radius: 25px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
+        .side-panel h3 { margin: 0 0 10px 0; font-family: 'Jua'; font-size: 1.2rem; color: var(--magenta); text-align: center; border-bottom: 1px solid var(--glass); padding-bottom: 8px; }
+        .live-status { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--cyan); font-family: 'Jua'; font-size: 0.9rem; line-height: 1.6; }
+        #log-list { flex: 1; overflow-y: auto; font-size: 0.82rem; }
+        .log-item { padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.3); margin-bottom: 8px; border-left: 5px solid var(--cyan); }
+
+        /* 결과 오버레이: 글자 잘림 방지 및 너비 조정 */
+        #res-overlay { 
+            position: absolute; top: 50%; left: 40%; transform: translate(-50%, -50%);
+            width: 500px; background: rgba(15, 23, 42, 0.95); 
+            border: 4px solid var(--cyan); border-radius: 30px; padding: 35px;
+            display: none; flex-direction: column; align-items: center; z-index: 10000;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        #res-msg { 
+            font-family: 'Jua'; font-size: 1.2rem; color: #fff; text-align: center; 
+            margin-bottom: 25px; line-height: 1.6; word-break: keep-all; 
+        }
+
+        /* 하단 컨트롤 */
+        .controls { padding: 15px 25px; background: rgba(0,0,0,0.85); border-top: 1px solid var(--glass); display: flex; flex-direction: column; gap: 10px; }
+        .slider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .slider-wrap { display: flex; align-items: center; gap: 12px; color: var(--cyan); font-weight: bold; font-family: 'Jua'; font-size: 1rem; }
+        input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
+
+        .btn-launch { 
+            width: 100%; padding: 16px; border-radius: 50px; border: none; color: #fff; 
+            font-family: 'Jua'; font-size: 1.5rem; cursor: pointer;
+            background: linear-gradient(to right, var(--cyan), var(--magenta));
+            box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+        }
+        .btn-launch:disabled { opacity: 0.3; }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="game-app">
+    <header>
+        <button class="fs-btn" onclick="toggleFS()">전체화면</button>
+        <div class="top-slogan">🎶 나도 어디서 꿀리지 않아~ GD(Gravity Deliverer)! 🎶</div>
+        <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
+    </header>
+
+    <nav>
+        <button class="nav-btn">🛸 신입 기사 훈련소</button>
+        <button class="nav-btn">🎬 GD’s Motion Lab</button>
+        <button class="nav-btn active">📦 배송 미션</button>
+        <button class="nav-btn">📒 업무 매뉴얼</button>
+        <button class="nav-btn">🪪 GD 자격증</button>
+    </nav>
+
+    <div class="sub-nav">
+        <button class="sub-btn">🚀 M1. 속력 대결</button>
+        <button class="sub-btn">📏 M2. 높이 대결</button>
+        <button class="sub-btn">👯 M3. 동시 배송</button>
+        <button class="sub-btn active">🌌 M4. 은하계 원정</button>
+    </div>
+
+    <div class="info-section">
+        <div class="cat-box">
+            <svg class="cat-character" viewBox="0 0 100 120">
+                <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="#00f7ff" stroke-width="2"/>
+                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/><circle cx="50" cy="45" r="25" fill="#f8fafc"/><circle cx="42" cy="42" r="3" fill="#000"/><circle cx="58" cy="42" r="3" fill="#000"/><path d="M48 50 Q50 55 52 50" stroke="#000" fill="none" stroke-width="2"/><rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/><text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
+            </svg>
+            <div class="dialogue">
+                🐱 냐옹! 이제 우리 무대는 우주다냥! <br> 
+                지구(🔵)와 행성 X(🔴)에서 동시에 택배를 쏴보자냥! <br>
+                <b>중력이 약해지면</b> 택배가 천천히 떨어지겠지냥? <br>
+                그럼 공중에 머무는 시간이 어떻게 될지 직접 확인해봐라냥!
+            </div>
+        </div>
+        <div class="side-panel" style="border-color: var(--cyan);">
+            <h3>📊 실시간 데이터</h3>
+            <div class="live-status">
+                🌍 지구: <span id="live-e" style="color:var(--yellow)">대기 중</span><br>
+                🪐 행성 X: <span id="live-x" style="color:var(--yellow)">대기 중</span>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="pane">
+            <div class="planet-tag tag-earth">🌍 지구 (Earth) [g=9.8]</div>
+            <canvas id="canvas-earth"></canvas>
+        </div>
+        <div class="pane">
+            <div class="planet-tag tag-x">🪐 행성 X (Planet X) [g=<span id="gx-val">4.9</span>]</div>
+            <canvas id="canvas-x"></canvas>
+        </div>
+        <aside class="side-panel">
+            <h3>📦 배송 기록실</h3>
+            <div id="log-list">기록이 없습니다.</div>
+        </aside>
+
+        <div id="res-overlay">
+            <div id="res-msg"></div>
+            <button class="btn-launch" style="padding: 12px; font-size: 1.1rem;" onclick="closeRes()">데이터 분석 확인 완료</button>
+        </div>
+    </main>
+
+    <div class="controls">
+        <div class="slider-row">
+            <div class="slider-wrap">🪐 행성 X 중력 조절 <input type="range" id="gx-range" min="1.0" max="20.0" step="0.1" value="4.9" oninput="updateG()"></div>
+            <div class="slider-wrap">🚀 수평 발사 속력 <input type="range" id="v-range" min="3" max="15" value="7" oninput="resetSim()"></div>
+        </div>
+        <button class="btn-launch" id="launch-btn" onclick="launch()">우주 동시 배송 시작! (LAUNCH)</button>
+    </div>
+</div>
+
+<script>
+    const cE = document.getElementById('canvas-earth');
+    const cX = document.getElementById('canvas-x');
+    const ctxE = cE.getContext('2d');
+    const ctxX = cX.getContext('2d');
+    const logList = document.getElementById('log-list');
+
+    let isRunning = false;
+    let timer = 0;
+    const strobeInterval = 18;
+
+    let eObj, xObj;
+
+    function toggleFS() {
+        const app = document.getElementById('game-app');
+        if (!document.fullscreenElement) {
+            if (app.requestFullscreen) app.requestFullscreen();
+            else if (app.webkitRequestFullscreen) app.webkitRequestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    function updateG() {
+        document.getElementById('gx-val').innerText = parseFloat(document.getElementById('gx-range').value).toFixed(1);
+        resetSim();
+    }
+
+    function resetSim() {
+        if(isRunning) return;
+        cE.width = cE.parentElement.clientWidth; cE.height = cE.parentElement.clientHeight;
+        cX.width = cX.parentElement.clientWidth; cX.height = cX.parentElement.clientHeight;
+
+        const v = parseFloat(document.getElementById('v-range').value);
+        const gx = parseFloat(document.getElementById('gx-range').value);
+        
+        eObj = { x: 40, y: 80, vx: v * 0.7, vy: 0, g: 0.16, strobes: [], landed: false, color: '#4ade80', t: 0 };
+        xObj = { x: 40, y: 80, vx: v * 0.7, vy: 0, g: (gx/9.8)*0.16, strobes: [], landed: false, color: '#ff2ef7', t: 0 };
+        timer = 0;
+        document.getElementById('res-overlay').style.display = 'none';
+        document.getElementById('launch-btn').disabled = false;
+        draw();
+    }
+
+    function launch() {
+        if(isRunning) return;
+        resetSim();
+        isRunning = true;
+        document.getElementById('launch-btn').disabled = true;
+        animate();
+    }
+
+    function animate() {
+        if(!isRunning) return;
+        timer++;
+
+        const update = (o, canvas, id) => {
+            if(!o.landed) {
+                o.t += 0.016;
+                o.vy += o.g;
+                o.x += o.vx;
+                o.y += o.vy;
+                if(timer % strobeInterval === 0) o.strobes.push({x: o.x, y: o.y});
+                if(o.y >= canvas.height - 40) { o.y = canvas.height - 40; o.landed = true; }
+                document.getElementById(id).innerText = `${o.t.toFixed(2)}s / ${((o.x-40)/10).toFixed(1)}m`;
+            }
+        };
+
+        update(eObj, cE, 'live-e');
+        update(xObj, cX, 'live-x');
+        draw();
+
+        if(eObj.landed && xObj.landed) {
+            isRunning = false;
+            showResult();
+        } else {
+            requestAnimationFrame(animate);
+        }
+    }
+
+    function draw() {
+        drawPane(ctxE, cE, eObj);
+        drawPane(ctxX, cX, xObj);
+    }
+
+    function drawPane(ctx, canvas, o) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 굵고 명확한 노란색 그리드
+        ctx.strokeStyle = "rgba(255, 242, 0, 0.4)";
+        ctx.lineWidth = 2;
+        for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+        for(let i=0; i<canvas.height; i+=50) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
+
+        ctx.fillStyle = "#1e293b"; ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+
+        // 섬광 사진 잔상
+        o.strobes.forEach((s, idx) => {
+            ctx.globalAlpha = (idx + 1) / (o.strobes.length + 3);
+            ctx.fillStyle = o.color;
+            ctx.fillRect(s.x, s.y, 25, 25);
+            ctx.strokeStyle = "white"; ctx.strokeRect(s.x, s.y, 25, 25);
+        });
+        ctx.globalAlpha = 1.0;
+
+        // 메인 택배 상자
+        ctx.fillStyle = o.color;
+        ctx.shadowBlur = 15; ctx.shadowColor = o.color;
+        ctx.fillRect(o.x, o.y, 30, 30);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "black"; ctx.font = "bold 12px sans-serif";
+        ctx.fillText("GD", o.x + 5, o.y + 20);
+    }
+
+    function showResult() {
+        const gx = parseFloat(document.getElementById('gx-range').value);
+        const overlay = document.getElementById('res-overlay');
+        const msg = document.getElementById('res-msg');
+        overlay.style.display = 'flex';
+
+        let analysis = "";
+        if(gx < 9.8) {
+            analysis = `<span style="color:var(--magenta)">행성 X</span>의 중력이 더 약해서 택배가 <b style="color:var(--yellow)">더 늦게</b> 떨어졌다냥!<br>
+            그만큼 옆으로 이동할 수 있는 <b style="color:var(--yellow)">시간</b>을 더 많이 벌었기 때문에, 
+            결국 수평 도달 거리도 <b style="color:var(--yellow)">더 멀어진</b> 거다냥!`;
+        } else if(gx > 9.8) {
+            analysis = `<span style="color:var(--magenta)">행성 X</span>의 중력이 강해서 지구보다 빨리 떨어졌다냥!<br>
+            옆으로 갈 시간이 부족해서 지구보다 짧게 날아갔다냥!`;
+        } else {
+            analysis = `두 행성의 중력이 같아 똑같이 배송되었다냥!`;
+        }
+        msg.innerHTML = analysis;
+
+        // 기록실 업데이트
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        item.style.borderLeftColor = gx < 9.8 ? "var(--magenta)" : "var(--cyan)";
+        item.innerHTML = `<b>행성X (g=${gx})</b><br>시간: ${xObj.t.toFixed(2)}s | 거리: ${((xObj.x-40)/10).toFixed(1)}m`;
+        if (logList.innerText.includes('기록이 없습니다')) logList.innerHTML = '';
+        logList.prepend(item);
+    }
+
+    function closeRes() {
+        document.getElementById('res-overlay').style.display = 'none';
+        resetSim();
+    }
+
+    window.onload = resetSim;
+    window.onresize = resetSim;
+</script>
+</body>
+</html>

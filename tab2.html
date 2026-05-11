@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Deliverer - Lab1. 무거운 물체 배송</title>
+    <style>
+        /* 탭 1과 동일한 폰트 세팅 */
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
+
+        :root {
+            --navy-deep: #020617;
+            --navy-mid: #0f172a;
+            --cyan: #00f7ff;
+            --magenta: #ff2ef7;
+            --yellow: #fff200;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: var(--navy-deep); color: var(--white);
+            font-family: 'Nanum Gothic', sans-serif; overflow: hidden;
+        }
+
+        .app-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; padding: 5px; }
+
+        /* 헤더 디자인 */
+        header { padding: 15px 0 5px; text-align: center; position: relative; }
+        header .top-slogan { 
+            font-size: 1.2rem; color: #ffccff; font-weight: bold;
+            font-family: 'Jua', sans-serif; margin-bottom: 5px;
+        }
+        .music-note { color: #ffccff; text-shadow: 0 0 10px var(--magenta); margin: 0 5px; }
+        header h1 { 
+            margin: 0; font-size: 3rem; font-family: 'Jua', sans-serif; 
+            color: var(--cyan); text-shadow: none; letter-spacing: 1px;
+        }
+
+        .fs-btn { 
+            position: absolute; right: 20px; top: 15px; padding: 8px 12px; 
+            border-radius: 8px; border: 1px solid var(--cyan); 
+            background: rgba(0, 247, 255, 0.1); color: var(--cyan); 
+            cursor: pointer; font-size: 0.85rem; font-family: 'Jua', sans-serif;
+        }
+
+        /* 상단 네비게이션 */
+        nav { display: flex; justify-content: center; padding: 5px; gap: 12px; }
+        .nav-btn { padding: 10px 18px; border: none; background: rgba(255,255,255,0.1); color: #aaa; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-weight: bold; font-family: 'Nanum Gothic'; }
+        .nav-btn.active { background: #fff; color: var(--navy-deep); box-shadow: 0 0 15px #fff; }
+
+        /* 서브 실험 선택 버튼 (요청 사항 반영) */
+        .sub-nav { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
+        .sub-btn { padding: 6px 15px; border-radius: 20px; border: 1px solid var(--magenta); background: rgba(255, 46, 247, 0.1); color: var(--magenta); font-family: 'Jua', sans-serif; cursor: pointer; font-size: 0.85rem; }
+        .sub-btn.active { background: var(--magenta); color: white; box-shadow: 0 0 10px var(--magenta); }
+
+        /* 정보 섹션 */
+        .info-section { display: flex; align-items: stretch; gap: 15px; padding: 0 25px; margin: 10px 0; height: 180px; }
+        .cat-wrap { display: flex; align-items: flex-end; gap: 10px; flex: 2.2; }
+        .cat-character { width: 85px; filter: drop-shadow(0 0 10px var(--cyan)); flex-shrink: 0; }
+        .dialogue-box { 
+            flex: 1; background: rgba(0,0,0,0.65); padding: 15px 20px; border-radius: 25px 25px 25px 0; 
+            border: 2px solid var(--glass); font-size: 1.15rem; line-height: 1.5;
+            font-family: 'Jua', sans-serif; color: #f8f8f8; overflow-y: auto;
+        }
+        .dialogue-box b { color: var(--yellow); border-bottom: 2px solid var(--yellow); }
+
+        /* 그래프 영역 */
+        .graph-wrap { 
+            flex: 1.2; background: #080c1d; border-radius: 25px; 
+            border: 3px solid var(--magenta); position: relative; padding: 10px;
+            display: flex; flex-direction: column; box-shadow: inset 0 0 20px rgba(255, 46, 247, 0.2);
+        }
+        .graph-header { text-align: center; font-family: 'Jua', sans-serif; font-size: 0.95rem; color: #fff; margin-bottom: 5px; }
+        .canvas-area { flex: 1; position: relative; }
+
+        /* 메인 레이아웃 */
+        main { flex: 1; display: grid; grid-template-columns: 1fr 300px; gap: 15px; padding: 0 15px; min-height: 0; }
+        .sim-container { background: #000; border-radius: 30px; border: 2px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* 데이터 카드 */
+        .side-panel { display: flex; flex-direction: column; gap: 8px; font-family: 'Nanum Gothic', sans-serif; }
+        .data-card { background: var(--navy-mid); border-radius: 18px; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .data-card h3 { margin: 0 0 8px 0; font-size: 0.85rem; color: var(--cyan); font-weight: bold; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .data-item { background: rgba(0,0,0,0.4); padding: 8px; border-radius: 12px; text-align: center; }
+        .data-label { font-size: 0.7rem; color: #aaa; margin-bottom: 2px; }
+        .data-val { font-size: 0.95rem; font-weight: bold; color: var(--yellow); font-family: monospace; }
+
+        /* 하단 컨트롤러 */
+        .controls { padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .control-row { display: flex; gap: 15px; align-items: center; justify-content: center; }
+        
+        .btn { padding: 12px 22px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Jua', sans-serif; font-size: 1rem; }
+        .btn-mode { background: #222; color: #888; border: 1px solid #444; flex: 1; font-family: 'Nanum Gothic'; }
+        .btn-mode.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,247,255,0.1); }
+        .btn-drop { background: linear-gradient(to right, var(--cyan), var(--magenta)); color: #fff; flex: 2; font-size: 1.2rem; box-shadow: 0 0 15px rgba(0,247,255,0.3); }
+        .btn-reset { background: #334155; color: #fff; flex: 0.6; }
+
+        .slider-wrap { display: flex; align-items: center; gap: 12px; color: var(--cyan); font-weight: bold; font-size: 0.9rem; flex: 1.5; font-family: 'Jua', sans-serif; }
+        input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <button class="fs-btn" onclick="toggleFullScreen()">전체화면</button>
+        <div class="top-slogan"><span class="music-note">🎶</span> 나도 어디서 꿀리지 않아~ GD(Gravity Deliverer)! <span class="music-note">🎶</span></div>
+        <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
+    </header>
+
+    <nav>
+        <button class="nav-btn" onclick="location.reload()">🛸 신입 기사 훈련소</button>
+        <button class="nav-btn active">🎬 GD’s Motion Lab</button>
+        <button class="nav-btn">📦 배송 미션</button>
+        <button class="nav-btn">📒 업무 매뉴얼</button>
+        <button class="nav-btn">🪪 GD 자격증</button>
+    </nav>
+
+    <div class="sub-nav">
+        <!-- 수정된 실험 명칭 반영 -->
+        <button class="sub-btn active">📦 Lab1. 무거운 물체 배송 (자유낙하)</button>
+        <button class="sub-btn" style="opacity: 0.5;">☄ 2-2 장거리 배송 (수평 던지기)</button>
+    </div>
+
+    <div class="info-section">
+        <div class="cat-wrap">
+            <svg class="cat-character" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="#00f7ff" stroke-width="2"/>
+                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/><circle cx="50" cy="45" r="25" fill="#f8fafc"/>
+                <path d="M35 30 L25 10 L45 25 Z" fill="#e2e8f0"/><path d="M65 30 L75 10 L55 25 Z" fill="#e2e8f0"/>
+                <circle cx="42" cy="42" r="3" fill="#000"/><circle cx="58" cy="42" r="3" fill="#000"/>
+                <path d="M48 50 Q50 55 52 50" stroke="#000" fill="none" stroke-width="2"/>
+                <rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/><text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
+            </svg>
+            <div class="dialogue-box">
+                Yo~ 훈련소에서 ⏱ <b>시간 간격</b>에 따른 물체의 📸 <b>다중 섬광 사진 차이</b>는 잘 보았냥? <br>
+                이번엔 질량이 다른 택배들의 ⚖ <b>질량 대결</b>이다냥! 무거운 💎 <b>금고</b>와 가벼운 🪶 <b>깃털</b>을 배달해야 하는데, <br>
+                🌌 <b>진공</b>일 때랑 💨 <b>공기저항</b>이 있을 때 낙하 운동이 어떻게 다른지 그래프를 통해 잘 관찰해봐냥! 렛츠 기릿~
+            </div>
+        </div>
+        <div class="graph-wrap">
+            <div class="graph-header">📈 실시간 속력 변화 그래프 (v-t)</div>
+            <div class="canvas-area"><canvas id="vtCanvas"></canvas></div>
+        </div>
+    </div>
+
+    <main>
+        <div class="sim-container" id="sim-container">
+            <canvas id="simCanvas"></canvas>
+        </div>
+
+        <div class="side-panel">
+            <div class="data-card">
+                <h3>⏱ 공통 정보</h3>
+                <div class="data-item" style="width:100%"><div class="data-label">경과 시간 (t)</div><div class="data-val" id="time-val">0.000 s</div></div>
+            </div>
+            <div class="data-card">
+                <h3>🪶 물체 A (가벼운 깃털)</h3>
+                <div class="data-grid">
+                    <div class="data-item"><div class="data-label">현재 높이</div><div class="data-val" id="h-a">10.0m</div></div>
+                    <div class="data-item"><div class="data-label">현재 속력</div><div class="data-val" id="v-a">0.0m/s</div></div>
+                </div>
+            </div>
+            <div class="data-card">
+                <h3>💎 물체 B (무거운 금고)</h3>
+                <div class="data-grid">
+                    <div class="data-item"><div class="data-label">현재 높이</div><div class="data-val" id="h-b">10.0m</div></div>
+                    <div class="data-item"><div class="data-label">현재 속력</div><div class="data-val" id="v-b">0.0m/s</div></div>
+                </div>
+                <div class="data-item" style="margin-top:8px; width:100%; border: 1px solid var(--magenta);"><div class="data-label">B의 설정 질량</div><div class="data-val" id="mass-val" style="color:var(--magenta)">50 kg</div></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="controls">
+        <div class="control-row">
+            <button class="btn btn-mode active" id="mode-vac" onclick="setAir(false)">🌌 진공 상태 (Vacuum)</button>
+            <button class="btn btn-mode" id="mode-air" onclick="setAir(true)">💨 공기 저항 (Air)</button>
+            <div class="slider-wrap">
+                <span>물체 B 질량 조절</span> 
+                <input type="range" id="mass-slider" min="1" max="100" step="1" value="50" oninput="updateMass()">
+            </div>
+        </div>
+        <div class="control-row">
+            <button class="btn btn-drop" id="drop-btn" onclick="startSim()">DROP THE BEAT (동시 투하!)</button>
+            <button class="btn btn-reset" onclick="resetSim()">리셋</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const simCanvas = document.getElementById('simCanvas');
+    const simCtx = simCanvas.getContext('2d');
+    const vtCanvas = document.getElementById('vtCanvas');
+    const vtCtx = vtCanvas.getContext('2d');
+    const massSlider = document.getElementById('mass-slider');
+    const massValText = document.getElementById('mass-val');
+
+    let isRunning = false;
+    let isAir = false;
+    let time = 0;
+    
+    let objA = { y: 40, vy: 0, landed: false, vt: [], color: '#00f7ff', type: 'feather' };
+    let objB = { y: 40, vy: 0, landed: false, vt: [], color: '#ff2ef7', type: 'safe', mass: 50 };
+
+    const G = 0.12; 
+
+    function resize() {
+        const container = document.getElementById('sim-container');
+        simCanvas.width = container.clientWidth;
+        simCanvas.height = container.clientHeight;
+        const canvasArea = document.querySelector('.canvas-area');
+        vtCanvas.width = canvasArea.clientWidth;
+        vtCanvas.height = canvasArea.clientHeight;
+        drawSim(); drawVT();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
+    }
+
+    function setAir(val) {
+        if (isRunning) return;
+        isAir = val;
+        document.getElementById('mode-air').classList.toggle('active', val);
+        document.getElementById('mode-vac').classList.toggle('active', !val);
+        resetSim();
+    }
+
+    function updateMass() {
+        if (isRunning) return;
+        objB.mass = parseInt(massSlider.value);
+        massValText.innerText = objB.mass + " kg";
+    }
+
+    function resetSim() {
+        isRunning = false; time = 0;
+        objA = { y: 40, vy: 0, landed: false, vt: [], color: '#00f7ff', type: 'feather' };
+        objB = { y: 40, vy: 0, landed: false, vt: [], color: '#ff2ef7', type: 'safe', mass: parseInt(massSlider.value) };
+        document.getElementById('time-val').innerText = "0.000 s";
+        document.getElementById('drop-btn').innerText = "DROP THE BEAT (동시 투하!)";
+        drawSim(); drawVT();
+    }
+
+    function startSim() {
+        if (isRunning) { resetSim(); return; }
+        resetSim();
+        isRunning = true;
+        document.getElementById('drop-btn').innerText = "STOP";
+    }
+
+    function loop() {
+        if (isRunning) {
+            time++;
+            const calcPhys = (obj, isLight) => {
+                if (obj.landed) return;
+                let accel = G;
+                if (isAir) {
+                    let dragFactor = isLight ? 0.015 : 0.001; 
+                    accel = G - (dragFactor * obj.vy * obj.vy) / (obj.mass || 1);
+                    if (accel < 0) accel = 0;
+                }
+                obj.vy += accel;
+                obj.y += obj.vy;
+                obj.vt.push(obj.vy);
+                const groundLimit = simCanvas.height - 110;
+                if (obj.y >= groundLimit) { obj.y = groundLimit; obj.landed = true; }
+            };
+            calcPhys(objA, true);
+            calcPhys(objB, false);
+
+            document.getElementById('time-val').innerText = (time/60).toFixed(3) + " s";
+            document.getElementById('h-a').innerText = Math.max(0, (simCanvas.height - 110 - objA.y)/25).toFixed(1) + "m";
+            document.getElementById('v-a').innerText = (objA.vy * 5).toFixed(1) + "m/s";
+            document.getElementById('h-b').innerText = Math.max(0, (simCanvas.height - 110 - objB.y)/25).toFixed(1) + "m";
+            document.getElementById('v-b').innerText = (objB.vy * 5).toFixed(1) + "m/s";
+
+            if (objA.landed && objB.landed) {
+                isRunning = false;
+                document.getElementById('drop-btn').innerText = "실험 완료! (리셋)";
+            }
+        }
+        drawSim();
+        drawVT();
+        requestAnimationFrame(loop);
+    }
+
+    function drawSim() {
+        simCtx.clearRect(0,0,simCanvas.width, simCanvas.height);
+        const groundY = simCanvas.height - 80;
+        const centerX = simCanvas.width / 2;
+
+        simCtx.strokeStyle = "rgba(255,255,255,0.05)";
+        for(let i=0; i<simCanvas.height; i+=50) {
+            simCtx.beginPath(); simCtx.moveTo(0, i); simCtx.lineTo(simCanvas.width, i); simCtx.stroke();
+        }
+
+        simCtx.fillStyle = "#334155";
+        simCtx.fillRect(0, groundY, simCanvas.width, 80);
+        simCtx.strokeStyle = varHex('--cyan'); simCtx.lineWidth = 3;
+        simCtx.beginPath(); simCtx.moveTo(0, groundY); simCtx.lineTo(simCanvas.width, groundY); simCtx.stroke();
+
+        const drawObj = (o, x, icon) => {
+            simCtx.shadowBlur = 15; simCtx.shadowColor = o.color;
+            simCtx.fillStyle = o.color;
+            simCtx.fillRect(x - 25, o.y, 50, 50);
+            simCtx.shadowBlur = 0;
+            simCtx.fillStyle = "#fff"; simCtx.font = "30px serif";
+            simCtx.textAlign = "center";
+            simCtx.fillText(icon, x, o.y + 36);
+        };
+        drawObj(objA, centerX - 80, '🪶');
+        drawObj(objB, centerX + 80, '💎');
+    }
+
+    function drawVT() {
+        vtCtx.clearRect(0,0,vtCanvas.width, vtCanvas.height);
+        const w = vtCanvas.width, h = vtCanvas.height;
+        const padL = 50, padR = 65, padT = 25, padB = 35;
+
+        vtCtx.strokeStyle = "#ffffff"; vtCtx.lineWidth = 2; vtCtx.beginPath();
+        vtCtx.moveTo(padL, padT); vtCtx.lineTo(padL, h - padB); vtCtx.lineTo(w - padR, h - padB); vtCtx.stroke();
+        
+        vtCtx.beginPath();
+        vtCtx.moveTo(padL-5, padT+8); vtCtx.lineTo(padL, padT); vtCtx.lineTo(padL+5, padT+8);
+        vtCtx.moveTo(w-padR-8, h-padB-5); vtCtx.lineTo(w-padR, h-padB); vtCtx.lineTo(w-padR-8, h-padB+5);
+        vtCtx.stroke();
+
+        vtCtx.fillStyle = varHex('--yellow'); vtCtx.font = "bold 12px sans-serif";
+        vtCtx.textAlign = "center";
+        vtCtx.fillText("속", padL - 30, padT + 12); 
+        vtCtx.fillText("력", padL - 30, padT + 27); 
+        vtCtx.fillText("(v)", padL - 30, padT + 45);
+        
+        vtCtx.textAlign = "left"; 
+        vtCtx.fillText("시간 (t)", w - padR + 8, h - padB + 5);
+
+        const drawLine = (data, color) => {
+            if (data.length === 0) return;
+            vtCtx.strokeStyle = color; vtCtx.lineWidth = 4; vtCtx.beginPath();
+            const stepX = (w - padL - padR) / 400; 
+            const scaleY = (h - padB - padT - 15) / 10;
+            vtCtx.moveTo(padL, (h - padB) - data[0] * scaleY);
+            for (let i = 1; i < data.length; i++) {
+                vtCtx.lineTo(padL + i * stepX, (h - padB) - data[i] * scaleY);
+            }
+            vtCtx.stroke();
+        };
+        drawLine(objA.vt, objA.color);
+        drawLine(objB.vt, objB.color);
+    }
+
+    function varHex(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+    resetSim();
+    requestAnimationFrame(loop);
+</script>
+</body>
+</html>
