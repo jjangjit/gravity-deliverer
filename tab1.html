@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Deliverer - 자격증 미션</title>
+    <style>
+        /* 폰트 설정: Jua(제목/대사), Nanum Gothic(기본/버튼) */
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
+
+        :root {
+            --navy-deep: #020617;
+            --navy-mid: #0f172a;
+            --cyan: #00f7ff;
+            --magenta: #ff2ef7;
+            --yellow: #fff200;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: var(--navy-deep); color: var(--white);
+            font-family: 'Nanum Gothic', sans-serif; overflow: hidden;
+        }
+
+        .app-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; padding: 5px; }
+
+        /* [수정] 헤더 섹션 */
+        header { padding: 15px 0 10px; text-align: center; position: relative; }
+        header .top-slogan { 
+            font-size: 1.2rem; color: #ffccff; font-weight: bold;
+            font-family: 'Jua', sans-serif; margin-bottom: 5px;
+        }
+        .music-note { color: #ffccff; text-shadow: 0 0 10px var(--magenta); margin: 0 5px; }
+        header h1 { 
+            margin: 0; font-size: 3rem; font-family: 'Jua', sans-serif; 
+            color: var(--cyan); text-shadow: none; /* 음영 제거 */
+            letter-spacing: 1px;
+        }
+
+        .fs-btn { position: absolute; right: 20px; top: 15px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--cyan); background: rgba(0, 247, 255, 0.1); color: var(--cyan); cursor: pointer; font-size: 0.8rem; font-family: 'Nanum Gothic'; }
+
+        nav { display: flex; justify-content: center; padding: 5px; gap: 12px; }
+        .nav-btn { padding: 10px 18px; border: none; background: rgba(255,255,255,0.1); color: #aaa; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-weight: bold; }
+        .nav-btn.active { background: #fff; color: var(--navy-deep); box-shadow: 0 0 15px #fff; }
+
+        /* 정보 섹션 (대사 + 그래프) */
+        .info-section { display: flex; align-items: stretch; gap: 15px; padding: 0 25px; margin: 10px 0; height: 175px; }
+        .cat-wrap { display: flex; align-items: flex-end; gap: 10px; flex: 2.2; }
+        .cat-character { width: 85px; filter: drop-shadow(0 0 10px var(--cyan)); flex-shrink: 0; }
+        .dialogue-box { 
+            flex: 1; background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 25px 25px 25px 0; 
+            border: 2px solid var(--glass); font-size: 1.1rem; line-height: 1.5;
+            font-family: 'Jua', sans-serif; color: #f8f8f8; overflow-y: auto;
+        }
+        .dialogue-box b { color: var(--yellow); border-bottom: 2px solid var(--yellow); }
+
+        /* [수정] 그래프 영역 */
+        .graph-wrap { 
+            flex: 1.3; background: #080c1d; border-radius: 25px; 
+            border: 3px solid var(--magenta); position: relative; padding: 10px;
+            display: flex; flex-direction: column;
+            box-shadow: inset 0 0 20px rgba(255, 46, 247, 0.2);
+        }
+        .graph-header {
+            text-align: center; font-family: 'Jua', sans-serif;
+            font-size: 0.95rem; color: #fff; margin-bottom: 5px;
+        }
+        .canvas-area { flex: 1; position: relative; }
+
+        /* 메인 시뮬레이션 영역 */
+        main { flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 0 15px; }
+        .sim-view { 
+            flex: 1; background: #000; border-radius: 30px; border: 2px solid rgba(255,255,255,0.1); 
+            position: relative; overflow: hidden;
+        }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        .metronome-ui {
+            position: absolute; top: 20px; left: 30px; display: flex; align-items: center; gap: 12px;
+            background: rgba(0,0,0,0.6); padding: 10px 18px; border-radius: 50px; border: 1px solid var(--cyan);
+            cursor: pointer; z-index: 10;
+        }
+        .beat-lamp { width: 15px; height: 15px; background: #333; border-radius: 50%; }
+        .beat-lamp.active { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+
+        /* [수정] 하단 컨트롤: 나눔고딕 깔끔한 스타일 */
+        .controls { display: flex; flex-direction: column; gap: 12px; padding: 15px 20px; font-family: 'Nanum Gothic', sans-serif; }
+        .control-row { display: flex; gap: 15px; align-items: center; justify-content: center; }
+        
+        .btn { padding: 12px 22px; border: none; border-radius: 50px; font-weight: bold; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+        .btn-mode { background: #222; color: #888; border: 1px solid #444; flex: 1; }
+        .btn-mode.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,247,255,0.1); }
+        .btn-drop { background: linear-gradient(to right, var(--cyan), var(--magenta)); color: #fff; flex: 2; font-size: 1.15rem; font-family: 'Jua', sans-serif; }
+        .btn-shutter { background: #fff; color: #000; flex: 1.4; box-shadow: 0 0 10px #fff; font-family: 'Jua', sans-serif; }
+        .btn-reset { background: #334155; color: #fff; flex: 0.6; }
+
+        .slider-wrap { display: flex; align-items: center; gap: 10px; color: var(--cyan); font-weight: bold; font-size: 0.85rem; flex: 1.5; font-family: 'Jua', sans-serif; }
+        input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="main-app">
+    <header>
+        <button class="fs-btn" onclick="toggleFullScreen()">전체화면</button>
+        <div class="top-slogan"><span class="music-note">🎶</span> 나도 어디서 꿀리지 않아~ GD(Gravity Deliverer)! <span class="music-note">🎶</span></div>
+        <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
+    </header>
+
+    <nav>
+        <button class="nav-btn active">🛸 신입 기사 훈련소</button>
+        <button class="nav-btn">🎬 GD’s Motion Lab</button>
+        <button class="nav-btn">📦 배송 미션</button>
+        <button class="nav-btn">📒 업무 매뉴얼</button>
+        <button class="nav-btn">🪪 GD 자격증</button>
+    </nav>
+
+    <div class="info-section">
+        <div class="cat-wrap">
+            <svg class="cat-character" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="#00f7ff" stroke-width="2"/>
+                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/>
+                <circle cx="50" cy="45" r="25" fill="#f8fafc"/>
+                <path d="M35 30 L25 10 L45 25 Z" fill="#e2e8f0"/>
+                <path d="M65 30 L75 10 L55 25 Z" fill="#e2e8f0"/>
+                <circle cx="42" cy="42" r="3" fill="#000"/>
+                <circle cx="58" cy="42" r="3" fill="#000"/>
+                <path d="M48 50 Q50 55 52 50" stroke="#000" fill="none" stroke-width="2"/>
+                <rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/>
+                <text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
+            </svg>
+            <div class="dialogue-box">
+                Yo~ 난 훈련소 대장 🐱 <b>냥디(NYANG-D)</b>다냥! <br> 
+                나도 어디서 꿀리지 않는 힙한 기사 자격증을 따고 싶다고? 그럼 이 훈련소부터 통과해야 해. <br>
+                일정한 시간 간격마다 ⏰ <b>'삑' 소리</b>가 날거다냥! 소리가 들릴 때마다 📸 <b>찰칵</b>을 눌러봐라냥~ <br>
+                아래 슬라이더로 자동차의 속도와 가속도를 조절해봐냥! <br>
+                <b>똑같은 시간 간격</b>마다 사진을 찍었을 때, 택배차의 <b>간격이 어떻게 변하는지</b> 관찰하는 게 <b>핵심</b>이다냥! 렛츠 기릿~냥!
+            </div>
+        </div>
+        <div class="graph-wrap">
+            <div class="graph-header">📈 실시간 속력 변화 그래프 (v-t)</div>
+            <div class="canvas-area">
+                <canvas id="vtCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="sim-view" id="sim-view">
+            <div class="metronome-ui" onclick="toggleInterval()">
+                <div class="beat-lamp" id="beat-lamp"></div>
+                <div id="interval-text" style="font-size: 0.8rem; font-weight: bold; color: var(--cyan);">⏰ 간격: 0.8s</div>
+            </div>
+            <div style="position:absolute; top:20px; right:30px; text-align:right; pointer-events:none; z-index:5;">
+                <div style="color:#aaa; font-size:0.75rem;">현재 속력</div>
+                <div id="vel-text" style="font-size:1.6rem; color:var(--yellow); font-weight:bold;">0.0 m/s</div>
+            </div>
+            <canvas id="simCanvas"></canvas>
+        </div>
+    </main>
+
+    <div class="controls">
+        <div class="control-row">
+            <button class="btn btn-mode active" id="mode-const" onclick="setMode('const')">등속 운동</button>
+            <button class="btn btn-mode" id="mode-accel" onclick="setMode('accel')">가속 운동</button>
+            <button class="btn btn-mode" id="mode-decel" onclick="setMode('decel')">감속 운동</button>
+            <div class="slider-wrap">
+                <span id="slider-label" style="white-space:nowrap;">속력 설정</span> 
+                <input type="range" id="param-slider" min="1" max="10" step="1" value="5">
+            </div>
+        </div>
+        <div class="control-row">
+            <button class="btn btn-drop" id="drop-btn" onclick="startSim()">DROP THE BEAT (출발!)</button>
+            <button class="btn btn-shutter" id="shutter" onclick="capture()" disabled>📸 소리에 맞춰 찰칵!</button>
+            <button class="btn btn-reset" onclick="resetSim()">리셋</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const simCanvas = document.getElementById('simCanvas');
+    const simCtx = simCanvas.getContext('2d');
+    const vtCanvas = document.getElementById('vtCanvas');
+    const vtCtx = vtCanvas.getContext('2d');
+    const shutter = document.getElementById('shutter');
+    const beatLamp = document.getElementById('beat-lamp');
+    const intervalText = document.getElementById('interval-text');
+    const paramSlider = document.getElementById('param-slider');
+    const sliderLabel = document.getElementById('slider-label');
+    const velText = document.getElementById('vel-text');
+
+    let mode = 'const';
+    let isRunning = false;
+    let truckX = 50; 
+    let vx = 0;
+    let ax = 0;
+    let lastX = 50;
+    let time = 0;
+    let captures = []; 
+    let vtData = []; 
+    
+    let audioCtx = null;
+    let beatInterval = 48; // 0.8s
+    const intervalList = [30, 48, 60]; 
+    let intervalIdx = 1;
+
+    function resize() {
+        const container = document.getElementById('sim-view');
+        simCanvas.width = container.clientWidth;
+        simCanvas.height = container.clientHeight;
+        
+        const canvasArea = document.querySelector('.canvas-area');
+        vtCanvas.width = canvasArea.clientWidth;
+        vtCanvas.height = canvasArea.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
+    }
+
+    function toggleInterval() {
+        if (isRunning) return;
+        intervalIdx = (intervalIdx + 1) % intervalList.length;
+        beatInterval = intervalList[intervalIdx];
+        intervalText.innerText = `⏰ 간격: ${(beatInterval/60).toFixed(1)}s`;
+    }
+
+    function playBeep() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        beatLamp.classList.add('active');
+        setTimeout(() => beatLamp.classList.remove('active'), 100);
+    }
+
+    function setMode(m) {
+        if(isRunning) return;
+        mode = m;
+        document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
+        document.getElementById('mode-' + m).classList.add('active');
+        sliderLabel.innerText = (m === 'const') ? '속력 설정' : '가속도 설정';
+        resetSim();
+    }
+
+    function resetSim() {
+        isRunning = false; truckX = 50; vx = 0; ax = 0; lastX = 50; time = 0;
+        captures = []; vtData = [];
+        shutter.disabled = true;
+        velText.innerText = "0.0 m/s";
+        document.getElementById('drop-btn').innerText = "DROP THE BEAT (출발!)";
+        drawSim(); drawVT();
+    }
+
+    function startSim() {
+        if(isRunning) { resetSim(); return; }
+        resetSim();
+        isRunning = true;
+        shutter.disabled = false;
+        document.getElementById('drop-btn').innerText = "STOP";
+        
+        const val = parseFloat(paramSlider.value);
+        if(mode === 'const') { vx = val * 0.75; ax = 0; }
+        // 가속 운동 완만하게 보정
+        if(mode === 'accel') { vx = 0.5; ax = val * 0.006 + 0.003; }
+        // 감속 운동: 더 멀리 가도록 보정
+        if(mode === 'decel') { vx = 8.5; ax = -(val * 0.004 + 0.005); }
+    }
+
+    function capture() {
+        if(!isRunning) return;
+        const interval = (truckX - lastX).toFixed(1);
+        captures.push({ x: truckX, interval: interval });
+        lastX = truckX;
+        simCanvas.style.backgroundColor = "rgba(255,255,255,0.05)";
+        setTimeout(() => simCanvas.style.backgroundColor = "transparent", 40);
+    }
+
+    function loop() {
+        if (isRunning) {
+            time++;
+            if (time % beatInterval === 0) playBeep();
+
+            vx += ax;
+            if(mode === 'decel' && vx < 0.1) vx = 0.1;
+            truckX += vx;
+
+            velText.innerText = (vx * 5).toFixed(1) + " m/s";
+            vtData.push(vx);
+
+            if (truckX > simCanvas.width - 80) {
+                isRunning = false;
+                shutter.disabled = true;
+                document.getElementById('drop-btn').innerText = "도착! (리셋)";
+            }
+        }
+        drawSim();
+        drawVT();
+        requestAnimationFrame(loop);
+    }
+
+    function drawSim() {
+        simCtx.clearRect(0,0,simCanvas.width, simCanvas.height);
+        const groundY = simCanvas.height - 70;
+
+        simCtx.fillStyle = "#1e1b4b";
+        simCtx.beginPath();
+        simCtx.moveTo(0, groundY);
+        simCtx.lineTo(150, groundY - 80); simCtx.lineTo(350, groundY - 120);
+        simCtx.lineTo(600, groundY - 60); simCtx.lineTo(simCanvas.width, groundY - 100);
+        simCtx.lineTo(simCanvas.width, groundY); simCtx.fill();
+
+        simCtx.fillStyle = "#334155";
+        simCtx.fillRect(0, groundY, simCanvas.width, 70);
+        simCtx.strokeStyle = "#94a3b8";
+        simCtx.lineWidth = 1;
+        simCtx.fillStyle = "#fff";
+        simCtx.font = "10px sans-serif";
+        for (let i = 0; i < simCanvas.width; i += 10) {
+            let h = (i % 50 === 0) ? 15 : 7;
+            simCtx.beginPath(); simCtx.moveTo(i, groundY); simCtx.lineTo(i, groundY + h); simCtx.stroke();
+            if (i % 50 === 0) simCtx.fillText(i, i - 5, groundY + 28);
+        }
+
+        captures.forEach((cap, i) => {
+            simCtx.globalAlpha = 0.3; simCtx.fillStyle = "#00f7ff";
+            simCtx.fillRect(cap.x, groundY - 45, 60, 40);
+            simCtx.globalAlpha = 1.0; simCtx.strokeStyle = "#00f7ff";
+            simCtx.strokeRect(cap.x, groundY - 45, 60, 40);
+            if (i > 0) {
+                simCtx.fillStyle = "#ff2ef7";
+                simCtx.font = "bold 13px sans-serif";
+                simCtx.fillText(`${cap.interval} cm`, cap.x + 5, groundY - 55);
+            }
+        });
+
+        const truckY = groundY - 45;
+        simCtx.shadowBlur = 15; simCtx.shadowColor = "#ff2ef7";
+        simCtx.fillStyle = "#ff2ef7";
+        simCtx.fillRect(truckX, truckY, 60, 40);
+        simCtx.shadowBlur = 0;
+        simCtx.fillStyle = "#fff"; simCtx.font = "bold 14px sans-serif";
+        simCtx.fillText("GD", truckX + 10, truckY + 25);
+        simCtx.fillStyle = "#000";
+        simCtx.beginPath(); simCtx.arc(truckX + 15, groundY, 8, 0, Math.PI*2); simCtx.fill();
+        simCtx.beginPath(); simCtx.arc(truckX + 45, groundY, 8, 0, Math.PI*2); simCtx.fill();
+    }
+
+    /* [수정] 정석 v-t 그래프 드로잉: 정교한 축 배치 */
+    function drawVT() {
+        vtCtx.clearRect(0,0,vtCanvas.width, vtCanvas.height);
+        const w = vtCanvas.width;
+        const h = vtCanvas.height;
+
+        const padL = 45; // y축 텍스트 공간
+        const padR = 60; // x축 텍스트 공간
+        const padT = 20; // y축 위쪽 여백
+        const padB = 30; // x축 아래쪽 여백
+
+        // 축 그리기
+        vtCtx.strokeStyle = "#ffffff";
+        vtCtx.lineWidth = 2;
+        vtCtx.beginPath();
+        vtCtx.moveTo(padL, padT); 
+        vtCtx.lineTo(padL, h - padB); 
+        vtCtx.lineTo(w - padR, h - padB); 
+        vtCtx.stroke();
+
+        // 화살표
+        vtCtx.beginPath();
+        vtCtx.moveTo(padL - 4, padT + 8); vtCtx.lineTo(padL, padT); vtCtx.lineTo(padL + 4, padT + 8);
+        vtCtx.moveTo(w - padR - 8, h - padB - 4); vtCtx.lineTo(w - padR, h - padB); vtCtx.lineTo(w - padR - 8, h - padB + 4);
+        vtCtx.stroke();
+
+        // y축 라벨 (세로쓰기)
+        vtCtx.fillStyle = "#fff200";
+        vtCtx.font = "bold 12px sans-serif";
+        vtCtx.textAlign = "center";
+        vtCtx.fillText("속", padL - 25, padT + 15);
+        vtCtx.fillText("력", padL - 25, padT + 30);
+        vtCtx.fillText("(v)", padL - 25, padT + 48); // 단위는 가로
+
+        // x축 라벨 (오른쪽 끝)
+        vtCtx.textAlign = "left";
+        vtCtx.fillText("시간 (t)", w - padR + 8, h - padB + 5);
+
+        if (vtData.length > 0) {
+            vtCtx.strokeStyle = "#00f7ff";
+            vtCtx.lineWidth = 4;
+            vtCtx.beginPath();
+            
+            const stepX = (w - padL - padR) / 600; 
+            const scaleY = (h - padB - padT - 10) / 10; 
+            
+            vtCtx.moveTo(padL, (h - padB) - vtData[0] * scaleY);
+            for (let i = 1; i < vtData.length; i++) {
+                vtCtx.lineTo(padL + i * stepX, (h - padB) - vtData[i] * scaleY);
+            }
+            vtCtx.stroke();
+        }
+    }
+
+    function resetSim() {
+        isRunning = false; truckX = 50; vx = 0; ax = 0; lastX = 50; time = 0;
+        captures = []; vtData = [];
+        shutter.disabled = true;
+        velText.innerText = "0.0 m/s";
+        document.getElementById('drop-btn').innerText = "DROP THE BEAT (출발!)";
+        drawSim(); drawVT();
+    }
+
+    resetSim();
+    requestAnimationFrame(loop);
+</script>
+</body>
+</html>
