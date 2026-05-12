@@ -416,31 +416,65 @@
   }
 }
 
-/* 모바일 가로 화면에서 전체 앱을 살짝 축소 */
-@media (orientation: landscape) and (pointer: coarse) and (max-height: 520px){
-  .app-container,
-  #main-app,
-  #game-app,
-  #game-body{
-    transform:scale(0.78);
-    transform-origin:top left;
-    width:128vw !important;
-    height:128vh !important;
-  }
+/* tab2 모바일 가로 안정화 */
+@media (orientation: landscape) and (pointer: coarse){
+
+    html, body{
+        overflow:hidden !important;
+    }
+
+    header{
+        padding:4px 0 2px !important;
+    }
+
+    header h1{
+        font-size:1.5rem !important;
+        line-height:1.05 !important;
+    }
+
+    nav{
+        gap:4px !important;
+    }
+
+    .nav-btn{
+        padding:5px 8px !important;
+        font-size:0.68rem !important;
+    }
+
+    .info-section{
+        height:95px !important;
+        margin-bottom:4px !important;
+    }
+
+    .dialogue-box{
+        font-size:0.72rem !important;
+        line-height:1.18 !important;
+        padding:8px !important;
+    }
+
+    .graph-wrap{
+        min-height:90px !important;
+    }
+
+    .side-panel{
+        width:135px !important;
+    }
+
+    .controls{
+        padding:6px !important;
+        gap:5px !important;
+    }
+
+    .btn{
+        font-size:0.72rem !important;
+        padding:6px 8px !important;
+    }
+
+    .slider-wrap{
+        font-size:0.7rem !important;
+    }
 }
 
-/* 더 작은 모바일 가로 화면 */
-@media (orientation: landscape) and (pointer: coarse) and (max-height: 430px){
-  .app-container,
-  #main-app,
-  #game-app,
-  #game-body{
-    transform:scale(0.68);
-    transform-origin:top left;
-    width:147vw !important;
-    height:147vh !important;
-  }
-}
 </style>
 </body>
 </html>
