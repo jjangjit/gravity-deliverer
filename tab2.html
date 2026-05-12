@@ -102,10 +102,189 @@
 
         .slider-wrap { display: flex; align-items: center; gap: 12px; color: var(--cyan); font-weight: bold; font-size: 0.9rem; flex: 1.5; font-family: 'Jua', sans-serif; }
         input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
+        /* ===== 모바일·태블릿 대응 ===== */
+
+/* 세로 화면 안내 */
+#rotateGuide{
+    display:none;
+}
+
+@media (orientation: portrait) and (pointer: coarse){
+
+    #rotateGuide{
+        position:fixed;
+        inset:0;
+        z-index:9999999;
+        background:#020617;
+        color:white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        padding:24px;
+        font-family:'Nanum Gothic', sans-serif;
+    }
+
+    .rotateBox{
+        max-width:420px;
+    }
+
+    .rotateIcon{
+        font-size:4rem;
+        margin-bottom:14px;
+    }
+
+    #rotateGuide h2{
+        margin:0 0 12px;
+        color:#00f7ff;
+        font-family:'Jua', sans-serif;
+        font-size:2rem;
+    }
+
+    #rotateGuide p{
+        margin:0;
+        color:#fff200;
+        line-height:1.6;
+        font-size:1.05rem;
+    }
+}
+
+/* 모바일 가로 안정화 */
+@media (orientation: landscape) and (pointer: coarse){
+
+    .app-container{
+        padding:2px;
+    }
+
+    header{
+        padding:4px 0 2px;
+    }
+
+    header .top-slogan{
+        font-size:0.7rem;
+        margin-bottom:1px;
+    }
+
+    header h1{
+        font-size:1.45rem;
+        line-height:1;
+    }
+
+    .fs-btn{
+        top:4px;
+        right:6px;
+        font-size:0.6rem;
+        padding:4px 6px;
+    }
+
+    nav{
+        gap:4px;
+        padding:2px;
+    }
+
+    .nav-btn{
+        padding:4px 7px;
+        font-size:0.6rem;
+        border-radius:8px;
+    }
+
+    .sub-nav{
+        gap:4px;
+        margin-top:2px;
+    }
+
+    .sub-btn{
+        padding:4px 8px;
+        font-size:0.6rem;
+    }
+
+    .info-section{
+        height:120px;
+        gap:8px;
+        padding:0 8px;
+        margin:4px 0;
+    }
+
+    .cat-character{
+        width:52px;
+    }
+
+    .dialogue-box{
+        font-size:0.68rem;
+        line-height:1.15;
+        padding:8px 10px;
+    }
+
+    .graph-wrap{
+        padding:5px;
+    }
+
+    .graph-header{
+        font-size:0.65rem;
+        margin-bottom:2px;
+    }
+
+    main{
+        grid-template-columns: 1fr 150px;
+        gap:8px;
+        padding:0 8px;
+    }
+
+    .side-panel{
+        gap:5px;
+    }
+
+    .data-card{
+        padding:6px;
+        border-radius:12px;
+    }
+
+    .data-card h3{
+        font-size:0.65rem;
+        margin-bottom:4px;
+    }
+
+    .data-label{
+        font-size:0.52rem;
+    }
+
+    .data-val{
+        font-size:0.72rem;
+    }
+
+    .controls{
+        padding:5px 8px 8px;
+        gap:5px;
+    }
+
+    .control-row{
+        gap:6px;
+    }
+
+    .btn{
+        padding:6px 8px;
+        font-size:0.65rem;
+    }
+
+    .btn-drop{
+        font-size:0.8rem;
+    }
+
+    .slider-wrap{
+        font-size:0.62rem;
+        gap:6px;
+    }
+}
     </style>
 </head>
 <body>
-
+<div id="rotateGuide">
+  <div class="rotateBox">
+    <div class="rotateIcon">📱↔️</div>
+    <h2>화면을 가로로 돌려주세요</h2>
+    <p>이 앱은 모바일·태블릿 가로 화면에서 가장 안정적으로 실행됩니다.</p>
+  </div>
+</div>
 <div class="app-container">
     <header>
         <button class="fs-btn" onclick="toggleFullScreen()">전체화면</button>
@@ -362,118 +541,6 @@
     resetSim();
     requestAnimationFrame(loop);
 </script>
-    <!-- 모바일 세로 화면 안내 + 가로 화면 축소 패치 -->
-<div id="rotateGuide">
-  <div class="rotateBox">
-    <div class="rotateIcon">📱↔️</div>
-    <h2>화면을 가로로 돌려주세요</h2>
-    <p>이 앱은 모바일·태블릿 가로 화면에서 가장 안정적으로 실행됩니다.</p>
-  </div>
-</div>
-
-<style>
-#rotateGuide{
-  display:none;
-}
-
-/* 모바일·태블릿 세로 화면 안내 */
-@media (orientation: portrait) and (pointer: coarse){
-  #rotateGuide{
-    position:fixed;
-    inset:0;
-    z-index:9999999;
-    background:#020617;
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:24px;
-    font-family:'Nanum Gothic', sans-serif;
-  }
-
-  .rotateBox{
-    max-width:420px;
-  }
-
-  .rotateIcon{
-    font-size:4rem;
-    margin-bottom:14px;
-  }
-
-  #rotateGuide h2{
-    margin:0 0 12px;
-    color:#00f7ff;
-    font-family:'Jua', sans-serif;
-    font-size:2rem;
-  }
-
-  #rotateGuide p{
-    margin:0;
-    color:#fff200;
-    line-height:1.6;
-    font-size:1.05rem;
-  }
-}
-
-/* tab2 모바일 가로 안정화 */
-@media (orientation: landscape) and (pointer: coarse){
-
-    html, body{
-        overflow:hidden !important;
-    }
-
-    header{
-        padding:4px 0 2px !important;
-    }
-
-    header h1{
-        font-size:1.5rem !important;
-        line-height:1.05 !important;
-    }
-
-    nav{
-        gap:4px !important;
-    }
-
-    .nav-btn{
-        padding:5px 8px !important;
-        font-size:0.68rem !important;
-    }
-
-    .info-section{
-        height:95px !important;
-        margin-bottom:4px !important;
-    }
-
-    .dialogue-box{
-        font-size:0.72rem !important;
-        line-height:1.18 !important;
-        padding:8px !important;
-    }
-
-    .graph-wrap{
-        min-height:90px !important;
-    }
-
-    .side-panel{
-        width:135px !important;
-    }
-
-    .controls{
-        padding:6px !important;
-        gap:5px !important;
-    }
-
-    .btn{
-        font-size:0.72rem !important;
-        padding:6px 8px !important;
-    }
-
-    .slider-wrap{
-        font-size:0.7rem !important;
-    }
-}
 
 </style>
 </body>
