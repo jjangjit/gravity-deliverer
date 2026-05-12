@@ -101,7 +101,53 @@
         input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
     </style>
 </head>
-<body>
+<div id="rotateGuide">
+    <div>
+        <div class="rotateIcon">📱↔️</div>
+        <h2>화면을 가로로 돌려주세요</h2>
+        <p>이 앱은 태블릿·모바일 가로 화면에서 가장 안정적으로 실행됩니다.</p>
+    </div>
+</div>
+
+<style>
+#rotateGuide{
+    display:none;
+}
+
+@media (orientation: portrait) and (max-width: 900px){
+    #rotateGuide{
+        position:fixed;
+        inset:0;
+        z-index:999999;
+        background:#020617;
+        color:white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        padding:24px;
+        font-family:'Nanum Gothic', sans-serif;
+    }
+
+    #rotateGuide h2{
+        margin:12px 0;
+        color:#00f7ff;
+        font-family:'Jua', sans-serif;
+        font-size:1.8rem;
+    }
+
+    #rotateGuide p{
+        color:#fff200;
+        line-height:1.6;
+        font-size:1rem;
+    }
+
+    .rotateIcon{
+        font-size:3rem;
+    }
+}
+</style>
+    <body>
 
 <div class="app-container" id="main-app">
     <header>
