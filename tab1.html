@@ -99,6 +99,42 @@
 
         .slider-wrap { display: flex; align-items: center; gap: 10px; color: var(--cyan); font-weight: bold; font-size: 0.85rem; flex: 1.5; font-family: 'Jua', sans-serif; }
         input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
+        /* tab1 모바일 가로 화면 추가 조정 */
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 520px){
+
+  .info-section{
+    height:110px !important;
+    margin:4px 0 !important;
+    padding:0 10px !important;
+  }
+
+  .cat-box{
+    padding:8px !important;
+    border-radius:18px !important;
+  }
+
+  .cat-character{
+    width:48px !important;
+  }
+
+  .dialogue{
+    font-size:0.82rem !important;
+    line-height:1.25 !important;
+  }
+
+  .graph-card{
+    min-height:90px !important;
+  }
+
+  main{
+    padding:0 8px !important;
+    gap:8px !important;
+  }
+
+  .controls{
+    padding:8px 16px !important;
+  }
+}
     </style>
 </head>
     <body>
