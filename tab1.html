@@ -422,5 +422,85 @@
     resetSim();
     requestAnimationFrame(loop);
 </script>
+        <!-- 모바일 세로 화면 안내 + 가로 화면 축소 패치 -->
+<div id="rotateGuide">
+  <div class="rotateBox">
+    <div class="rotateIcon">📱↔️</div>
+    <h2>화면을 가로로 돌려주세요</h2>
+    <p>이 앱은 모바일·태블릿 가로 화면에서 가장 안정적으로 실행됩니다.</p>
+  </div>
+</div>
+
+<style>
+#rotateGuide{
+  display:none;
+}
+
+/* 모바일·태블릿 세로 화면 안내 */
+@media (orientation: portrait) and (pointer: coarse){
+  #rotateGuide{
+    position:fixed;
+    inset:0;
+    z-index:9999999;
+    background:#020617;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:24px;
+    font-family:'Nanum Gothic', sans-serif;
+  }
+
+  .rotateBox{
+    max-width:420px;
+  }
+
+  .rotateIcon{
+    font-size:4rem;
+    margin-bottom:14px;
+  }
+
+  #rotateGuide h2{
+    margin:0 0 12px;
+    color:#00f7ff;
+    font-family:'Jua', sans-serif;
+    font-size:2rem;
+  }
+
+  #rotateGuide p{
+    margin:0;
+    color:#fff200;
+    line-height:1.6;
+    font-size:1.05rem;
+  }
+}
+
+/* 모바일 가로 화면에서 전체 앱을 살짝 축소 */
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 520px){
+  .app-container,
+  #main-app,
+  #game-app,
+  #game-body{
+    transform:scale(0.78);
+    transform-origin:top left;
+    width:128vw !important;
+    height:128vh !important;
+  }
+}
+
+/* 더 작은 모바일 가로 화면 */
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 430px){
+  .app-container,
+  #main-app,
+  #game-app,
+  #game-body{
+    transform:scale(0.68);
+    transform-origin:top left;
+    width:147vw !important;
+    height:147vh !important;
+  }
+}
+</style>
 </body>
 </html>
