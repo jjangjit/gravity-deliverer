@@ -150,123 +150,143 @@
 }
 
 /* 모바일 가로 안정화 */
+/* 모바일 가로 안정화 */
 @media (orientation: landscape) and (pointer: coarse){
 
     .app-container{
         height:100dvh;
-        overflow:hidden;
-        display:grid;
-        grid-template-rows:auto auto auto minmax(0,1fr) auto;
-        gap:2px;
         padding:2px;
+        display:flex;
+        flex-direction:column;
+        overflow:hidden;
     }
 
     header{
-        padding:2px 0 0;
+        flex:0 0 auto;
+        padding:3px 0 1px;
     }
 
     header .top-slogan{
-        display:none;
+        display:block;
+        font-size:0.62rem;
+        line-height:1;
+        margin-bottom:1px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        padding:0 54px 0 6px;
     }
 
     header h1{
-        font-size:clamp(0.95rem, 3vw, 1.25rem);
+        font-size:1.05rem;
         line-height:1;
         white-space:nowrap;
         overflow:hidden;
         text-overflow:ellipsis;
-        padding:0 50px 0 4px;
+        padding:0 54px 0 6px;
     }
 
     .fs-btn{
         top:3px;
-        right:4px;
+        right:5px;
         font-size:0.55rem;
         padding:3px 5px;
     }
 
     nav{
+        flex:0 0 auto;
+        display:flex;
+        justify-content:center;
+        align-items:center;
         gap:4px;
         padding:2px 4px;
-        justify-content:flex-start;
-        overflow-x:auto;
-        overflow-y:hidden;
         flex-wrap:nowrap;
     }
 
     .nav-btn{
-        flex:0 0 auto;
-        padding:4px 7px;
-        font-size:0.58rem;
+        flex:0 1 auto;
+        padding:4px 6px;
+        font-size:0.54rem;
         border-radius:8px;
         white-space:nowrap;
     }
 
     .sub-nav{
+        flex:0 0 auto;
+        display:flex;
+        justify-content:center;
+        align-items:center;
         gap:4px;
-        margin-top:0;
+        margin-top:1px;
         padding:0 4px;
-        justify-content:flex-start;
-        overflow-x:auto;
-        overflow-y:hidden;
         flex-wrap:nowrap;
     }
 
     .sub-btn{
-        flex:0 0 auto;
-        padding:4px 7px;
-        font-size:0.56rem;
+        flex:0 1 auto;
+        padding:3px 6px;
+        font-size:0.54rem;
         white-space:nowrap;
     }
 
     .info-section{
-        height:78px;
-        min-height:0;
-        gap:5px;
-        padding:0 4px;
-        margin:0;
+        flex:0 0 92px;
+        height:92px;
+        min-height:92px;
+        gap:6px;
+        padding:0 6px;
+        margin:2px 0;
+        overflow:hidden;
     }
 
     .cat-wrap{
-        flex:1.5;
+        flex:1.45;
         min-width:0;
-        gap:5px;
+        gap:6px;
     }
 
     .cat-character{
-        width:38px;
+        width:42px;
     }
 
     .dialogue-box{
-        font-size:0.56rem;
-        line-height:1.12;
-        padding:5px 7px;
-        border-radius:12px 12px 12px 0;
+        font-size:0.6rem;
+        line-height:1.14;
+        padding:6px 8px;
+        border-radius:14px 14px 14px 0;
+        overflow-y:auto;
     }
 
     .graph-wrap{
-        flex:0.9;
-        min-width:150px;
+        flex:0.85;
+        min-width:165px;
         border-width:2px;
-        border-radius:12px;
+        border-radius:14px;
         padding:4px;
+        overflow:hidden;
     }
 
     .graph-header{
-        display:none;
+        font-size:0.58rem;
+        line-height:1;
+        margin-bottom:2px;
     }
 
     main{
+        flex:1 1 auto;
         min-height:0;
-        height:100%;
-        grid-template-columns:minmax(0,1fr) 132px;
-        gap:5px;
-        padding:0 4px;
+        display:grid;
+        grid-template-columns:minmax(0,1fr) 138px;
+        gap:6px;
+        padding:0 6px;
+        overflow:hidden;
     }
 
     .sim-container{
         min-height:0;
+        height:100%;
         border-radius:16px;
+        overflow:hidden;
     }
 
     .side-panel{
@@ -295,7 +315,7 @@
     }
 
     .data-label{
-        font-size:0.44rem;
+        font-size:0.45rem;
     }
 
     .data-val{
@@ -303,7 +323,8 @@
     }
 
     .controls{
-        padding:3px 4px 4px;
+        flex:0 0 auto;
+        padding:3px 6px 4px;
         gap:3px;
     }
 
@@ -324,7 +345,7 @@
     .slider-wrap{
         font-size:0.5rem;
         gap:4px;
-        min-width:110px;
+        min-width:115px;
     }
 
     input[type=range]{
