@@ -231,7 +231,7 @@
 
     .info-section{
         flex:0 0 92px;
-        height:92px;
+        height:72px;
         min-height:92px;
         gap:6px;
         padding:0 6px;
@@ -526,7 +526,7 @@
                 obj.vy += accel;
                 obj.y += obj.vy;
                 obj.vt.push(obj.vy);
-                const groundLimit = simCanvas.height - 110;
+                const groundLimit = simCanvas.height - 65;
                 if (obj.y >= groundLimit) { obj.y = groundLimit; obj.landed = true; }
             };
             calcPhys(objA, true);
@@ -550,7 +550,7 @@
 
     function drawSim() {
         simCtx.clearRect(0,0,simCanvas.width, simCanvas.height);
-        const groundY = simCanvas.height - 80;
+        const groundY = simCanvas.height - 35;
         const centerX = simCanvas.width / 2;
 
         simCtx.strokeStyle = "rgba(255,255,255,0.05)";
@@ -579,7 +579,7 @@
     function drawVT() {
         vtCtx.clearRect(0,0,vtCanvas.width, vtCanvas.height);
         const w = vtCanvas.width, h = vtCanvas.height;
-        const padL = 50, padR = 65, padT = 25, padB = 35;
+        const padL = 50, padR = 65, padT = 25, padB = 26;
 
         vtCtx.strokeStyle = "#ffffff"; vtCtx.lineWidth = 2; vtCtx.beginPath();
         vtCtx.moveTo(padL, padT); vtCtx.lineTo(padL, h - padB); vtCtx.lineTo(w - padR, h - padB); vtCtx.stroke();
