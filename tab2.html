@@ -1,367 +1,599 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gravity Deliverer - Lab1. 무거운 물체 배송</title>
-    <style>
-        /* 탭 1과 동일한 폰트 세팅 */
-        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gravity Deliverer - Lab1. 무거운 물체 배송</title>
 
-        :root {
-            --navy-deep: #020617;
-            --navy-mid: #0f172a;
-            --cyan: #00f7ff;
-            --magenta: #ff2ef7;
-            --yellow: #fff200;
-            --white: #ffffff;
-            --glass: rgba(255, 255, 255, 0.1);
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: var(--navy-deep); color: var(--white);
-            font-family: 'Nanum Gothic', sans-serif; overflow: hidden;
-        }
-
-        .app-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; padding: 5px; }
-
-        /* 헤더 디자인 */
-        header { padding: 15px 0 5px; text-align: center; position: relative; }
-        header .top-slogan { 
-            font-size: 1.2rem; color: #ffccff; font-weight: bold;
-            font-family: 'Jua', sans-serif; margin-bottom: 5px;
-        }
-        .music-note { color: #ffccff; text-shadow: 0 0 10px var(--magenta); margin: 0 5px; }
-        header h1 { 
-            margin: 0; font-size: 3rem; font-family: 'Jua', sans-serif; 
-            color: var(--cyan); text-shadow: none; letter-spacing: 1px;
-        }
-
-        .fs-btn { 
-            position: absolute; right: 20px; top: 15px; padding: 8px 12px; 
-            border-radius: 8px; border: 1px solid var(--cyan); 
-            background: rgba(0, 247, 255, 0.1); color: var(--cyan); 
-            cursor: pointer; font-size: 0.85rem; font-family: 'Jua', sans-serif;
-        }
-
-        /* 상단 네비게이션 */
-        nav { display: flex; justify-content: center; padding: 5px; gap: 12px; }
-        .nav-btn { padding: 10px 18px; border: none; background: rgba(255,255,255,0.1); color: #aaa; border-radius: 12px; cursor: pointer; font-size: 0.95rem; font-weight: bold; font-family: 'Nanum Gothic'; }
-        .nav-btn.active { background: #fff; color: var(--navy-deep); box-shadow: 0 0 15px #fff; }
-
-        /* 서브 실험 선택 버튼 (요청 사항 반영) */
-        .sub-nav { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
-        .sub-btn { padding: 6px 15px; border-radius: 20px; border: 1px solid var(--magenta); background: rgba(255, 46, 247, 0.1); color: var(--magenta); font-family: 'Jua', sans-serif; cursor: pointer; font-size: 0.85rem; }
-        .sub-btn.active { background: var(--magenta); color: white; box-shadow: 0 0 10px var(--magenta); }
-
-        /* 정보 섹션 */
-        .info-section { display: flex; align-items: stretch; gap: 15px; padding: 0 25px; margin: 10px 0; height: 180px; }
-        .cat-wrap { display: flex; align-items: flex-end; gap: 10px; flex: 2.2; }
-        .cat-character { width: 85px; filter: drop-shadow(0 0 10px var(--cyan)); flex-shrink: 0; }
-        .dialogue-box { 
-            flex: 1; background: rgba(0,0,0,0.65); padding: 15px 20px; border-radius: 25px 25px 25px 0; 
-            border: 2px solid var(--glass); font-size: 1.15rem; line-height: 1.5;
-            font-family: 'Jua', sans-serif; color: #f8f8f8; overflow-y: auto;
-        }
-        .dialogue-box b { color: var(--yellow); border-bottom: 2px solid var(--yellow); }
-
-        /* 그래프 영역 */
-        .graph-wrap { 
-            flex: 1.2; background: #080c1d; border-radius: 25px; 
-            border: 3px solid var(--magenta); position: relative; padding: 10px;
-            display: flex; flex-direction: column; box-shadow: inset 0 0 20px rgba(255, 46, 247, 0.2);
-        }
-        .graph-header { text-align: center; font-family: 'Jua', sans-serif; font-size: 0.95rem; color: #fff; margin-bottom: 5px; }
-        .canvas-area { flex: 1; position: relative; }
-
-        /* 메인 레이아웃 */
-        main { flex: 1; display: grid; grid-template-columns: 1fr 300px; gap: 15px; padding: 0 15px; min-height: 0; }
-        .sim-container { background: #000; border-radius: 30px; border: 2px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
-        canvas { width: 100%; height: 100%; display: block; }
-
-        /* 데이터 카드 */
-        .side-panel { display: flex; flex-direction: column; gap: 8px; font-family: 'Nanum Gothic', sans-serif; }
-        .data-card { background: var(--navy-mid); border-radius: 18px; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
-        .data-card h3 { margin: 0 0 8px 0; font-size: 0.85rem; color: var(--cyan); font-weight: bold; }
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .data-item { background: rgba(0,0,0,0.4); padding: 8px; border-radius: 12px; text-align: center; }
-        .data-label { font-size: 0.7rem; color: #aaa; margin-bottom: 2px; }
-        .data-val { font-size: 0.95rem; font-weight: bold; color: var(--yellow); font-family: monospace; }
-
-        /* 하단 컨트롤러 */
-        .controls { padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
-        .control-row { display: flex; gap: 15px; align-items: center; justify-content: center; }
-        
-        .btn { padding: 12px 22px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Jua', sans-serif; font-size: 1rem; }
-        .btn-mode { background: #222; color: #888; border: 1px solid #444; flex: 1; font-family: 'Nanum Gothic'; }
-        .btn-mode.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,247,255,0.1); }
-        .btn-drop { background: linear-gradient(to right, var(--cyan), var(--magenta)); color: #fff; flex: 2; font-size: 1.2rem; box-shadow: 0 0 15px rgba(0,247,255,0.3); }
-        .btn-reset { background: #334155; color: #fff; flex: 0.6; }
-
-        .slider-wrap { display: flex; align-items: center; gap: 12px; color: var(--cyan); font-weight: bold; font-size: 0.9rem; flex: 1.5; font-family: 'Jua', sans-serif; }
-        input[type=range] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
-        /* ===== 모바일·태블릿 대응 ===== */
-
-/* 세로 화면 안내 */
-#rotateGuide{
-    display:none;
+:root {
+    --navy-deep: #020617;
+    --navy-mid: #0f172a;
+    --cyan: #00f7ff;
+    --magenta: #ff2ef7;
+    --yellow: #fff200;
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.1);
 }
 
-@media (orientation: portrait) and (pointer: coarse){
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    #rotateGuide{
-        position:fixed;
-        inset:0;
-        z-index:9999999;
-        background:#020617;
-        color:white;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        text-align:center;
-        padding:24px;
-        font-family:'Nanum Gothic', sans-serif;
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--navy-deep);
+    color: var(--white);
+    font-family: 'Nanum Gothic', sans-serif;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    padding: 5px;
+    overflow: hidden;
+}
+
+header {
+    padding: 15px 0 5px;
+    text-align: center;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+header .top-slogan {
+    font-size: 1.2rem;
+    color: #ffccff;
+    font-weight: bold;
+    font-family: 'Jua', sans-serif;
+    margin-bottom: 5px;
+}
+
+.music-note {
+    color: #ffccff;
+    text-shadow: 0 0 10px var(--magenta);
+    margin: 0 5px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 3rem;
+    font-family: 'Jua', sans-serif;
+    color: var(--cyan);
+    letter-spacing: 1px;
+}
+
+.fs-btn {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--cyan);
+    background: rgba(0, 247, 255, 0.1);
+    color: var(--cyan);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: 'Jua', sans-serif;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+    gap: 12px;
+    flex: 0 0 auto;
+}
+
+.nav-btn {
+    padding: 10px 18px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: #aaa;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: bold;
+    font-family: 'Nanum Gothic';
+}
+
+.nav-btn.active {
+    background: #fff;
+    color: var(--navy-deep);
+    box-shadow: 0 0 15px #fff;
+}
+
+.sub-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 5px;
+    flex: 0 0 auto;
+}
+
+.sub-btn {
+    padding: 6px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--magenta);
+    background: rgba(255, 46, 247, 0.1);
+    color: var(--magenta);
+    font-family: 'Jua', sans-serif;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.sub-btn.active {
+    background: var(--magenta);
+    color: white;
+    box-shadow: 0 0 10px var(--magenta);
+}
+
+.info-section {
+    display: flex;
+    align-items: stretch;
+    gap: 15px;
+    padding: 0 25px;
+    margin: 10px 0;
+    height: 180px;
+    flex: 0 0 auto;
+}
+
+.cat-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex: 2.2;
+}
+
+.cat-character {
+    width: 85px;
+    filter: drop-shadow(0 0 10px var(--cyan));
+    flex-shrink: 0;
+}
+
+.dialogue-box {
+    flex: 1;
+    background: rgba(0,0,0,0.65);
+    padding: 15px 20px;
+    border-radius: 25px 25px 25px 0;
+    border: 2px solid var(--glass);
+    font-size: 1.15rem;
+    line-height: 1.5;
+    font-family: 'Jua', sans-serif;
+    color: #f8f8f8;
+    overflow-y: auto;
+}
+
+.dialogue-box b {
+    color: var(--yellow);
+    border-bottom: 2px solid var(--yellow);
+}
+
+.graph-wrap {
+    flex: 1.2;
+    background: #080c1d;
+    border-radius: 25px;
+    border: 3px solid var(--magenta);
+    position: relative;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: inset 0 0 20px rgba(255, 46, 247, 0.2);
+}
+
+.mobile-graph-wrap {
+    display: none;
+}
+
+.graph-header {
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    color: #fff;
+    margin-bottom: 5px;
+    flex: 0 0 auto;
+}
+
+.canvas-area {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+}
+
+main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 15px;
+    padding: 0 15px;
+    min-height: 0;
+}
+
+.sim-container {
+    background: #000;
+    border-radius: 30px;
+    border: 2px solid rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: 'Nanum Gothic', sans-serif;
+    min-height: 0;
+}
+
+.data-card {
+    background: var(--navy-mid);
+    border-radius: 18px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.data-card h3 {
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    color: var(--cyan);
+    font-weight: bold;
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.data-item {
+    background: rgba(0,0,0,0.4);
+    padding: 8px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.data-label {
+    font-size: 0.7rem;
+    color: #aaa;
+    margin-bottom: 2px;
+}
+
+.data-val {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--yellow);
+    font-family: monospace;
+}
+
+.controls {
+    padding: 10px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+.control-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: 'Jua', sans-serif;
+    font-size: 1rem;
+}
+
+.btn-mode {
+    background: #222;
+    color: #888;
+    border: 1px solid #444;
+    flex: 1;
+    font-family: 'Nanum Gothic';
+}
+
+.btn-mode.active {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0,247,255,0.1);
+}
+
+.btn-drop {
+    background: linear-gradient(to right, var(--cyan), var(--magenta));
+    color: #fff;
+    flex: 2;
+    font-size: 1.2rem;
+    box-shadow: 0 0 15px rgba(0,247,255,0.3);
+}
+
+.btn-reset {
+    background: #334155;
+    color: #fff;
+    flex: 0.6;
+}
+
+.slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--cyan);
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex: 1.5;
+    font-family: 'Jua', sans-serif;
+}
+
+input[type=range] {
+    flex: 1;
+    accent-color: var(--cyan);
+    cursor: pointer;
+}
+
+#rotateGuide {
+    display: none;
+}
+
+@media (orientation: portrait) and (pointer: coarse) {
+    #rotateGuide {
+        position: fixed;
+        inset: 0;
+        z-index: 9999999;
+        background: #020617;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px;
+        font-family: 'Nanum Gothic', sans-serif;
     }
 
-    .rotateBox{
-        max-width:420px;
+    .rotateBox {
+        max-width: 420px;
     }
 
-    .rotateIcon{
-        font-size:4rem;
-        margin-bottom:14px;
+    .rotateIcon {
+        font-size: 4rem;
+        margin-bottom: 14px;
     }
 
-    #rotateGuide h2{
-        margin:0 0 12px;
-        color:#00f7ff;
-        font-family:'Jua', sans-serif;
-        font-size:2rem;
+    #rotateGuide h2 {
+        margin: 0 0 12px;
+        color: #00f7ff;
+        font-family: 'Jua', sans-serif;
+        font-size: 2rem;
     }
 
-    #rotateGuide p{
-        margin:0;
-        color:#fff200;
-        line-height:1.6;
-        font-size:1.05rem;
+    #rotateGuide p {
+        margin: 0;
+        color: #fff200;
+        line-height: 1.6;
+        font-size: 1.05rem;
     }
 }
-/* 모바일 가로 안정화 - 스크롤 허용 버전 */
-@media (orientation: landscape) and (pointer: coarse){
 
-    html, body{
-        width:100%;
-        height:auto;
-        min-height:100dvh;
-        overflow-x:hidden;
-        overflow-y:auto;
+/* 모바일 가로 전용: 냥디 대사 제거, 그래프를 오른쪽 데이터 패널 위로 이동 */
+@media (orientation: landscape) and (pointer: coarse) {
+    html, body {
+        width: 100%;
+        height: 100dvh;
+        overflow: hidden;
     }
 
-    .app-container{
-        width:100vw;
-        min-height:620px;
-        height:auto;
-        padding:4px;
-        display:flex;
-        flex-direction:column;
-        overflow:visible;
+    .app-container {
+        width: 100vw;
+        height: 100dvh;
+        padding: 2px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
-    header{
-        flex:0 0 auto;
-        padding:3px 0 2px;
+    header {
+        padding: 2px 0 1px;
+        flex: 0 0 auto;
     }
 
-    header .top-slogan{
-        font-size:0.68rem;
-        line-height:1;
-        margin-bottom:2px;
-        white-space:nowrap;
-        overflow:hidden;
-        text-overflow:ellipsis;
-        padding:0 54px 0 6px;
+    header .top-slogan {
+        font-size: 0.62rem;
+        line-height: 1;
+        margin-bottom: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 54px 0 6px;
     }
 
-    header h1{
-        font-size:1.15rem;
-        line-height:1;
-        white-space:nowrap;
-        overflow:hidden;
-        text-overflow:ellipsis;
-        padding:0 54px 0 6px;
+    header h1 {
+        font-size: 1rem;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 54px 0 6px;
     }
 
-    .fs-btn{
-        top:4px;
-        right:6px;
-        font-size:0.55rem;
-        padding:3px 6px;
+    .fs-btn {
+        top: 3px;
+        right: 5px;
+        font-size: 0.52rem;
+        padding: 3px 5px;
     }
 
-    nav,
-    .sub-nav{
-        flex:0 0 auto;
-        justify-content:center;
-        gap:4px;
-        padding:2px 4px;
-        flex-wrap:nowrap;
-        overflow-x:auto;
+    nav {
+        flex: 0 0 auto;
+        gap: 3px;
+        padding: 1px 3px;
+        justify-content: center;
+        overflow: hidden;
+        flex-wrap: nowrap;
     }
 
-    .nav-btn{
-        flex:0 0 auto;
-        padding:4px 7px;
-        font-size:0.58rem;
-        white-space:nowrap;
+    .nav-btn {
+        flex: 0 1 auto;
+        padding: 3px 5px;
+        font-size: 0.5rem;
+        white-space: nowrap;
+        border-radius: 7px;
     }
 
-    .sub-btn{
-        flex:0 0 auto;
-        padding:4px 7px;
-        font-size:0.56rem;
-        white-space:nowrap;
+    .sub-nav {
+        flex: 0 0 auto;
+        gap: 3px;
+        margin-top: 1px;
+        padding: 0 3px;
+        justify-content: center;
+        overflow: hidden;
+        flex-wrap: nowrap;
     }
 
-    .info-section{
-        flex:0 0 105px;
-        height:105px;
-        min-height:105px;
-        gap:6px;
-        padding:0 6px;
-        margin:3px 0;
-        overflow:hidden;
+    .sub-btn {
+        flex: 0 1 auto;
+        padding: 3px 5px;
+        font-size: 0.5rem;
+        white-space: nowrap;
     }
 
-    .cat-wrap{
-        flex:1.45;
-        min-width:0;
-        gap:6px;
+    .info-section {
+        display: none;
     }
 
-    .cat-character{
-        width:44px;
+    main {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 170px;
+        gap: 5px;
+        padding: 2px 4px;
+        overflow: hidden;
     }
 
-    .dialogue-box{
-        font-size:0.62rem;
-        line-height:1.18;
-        padding:7px 9px;
-        overflow-y:auto;
+    .sim-container {
+        height: 100%;
+        min-height: 0;
+        border-radius: 14px;
+        overflow: hidden;
     }
 
-    .graph-wrap{
-        flex:0.9;
-        min-width:175px;
-        border-width:2px;
-        border-radius:14px;
-        padding:4px;
-        overflow:hidden;
+    .side-panel {
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+        gap: 3px;
     }
 
-    .graph-header{
-        font-size:0.58rem;
-        line-height:1;
-        margin-bottom:2px;
+    .mobile-graph-wrap {
+        display: flex;
+        flex: 0 0 92px;
+        height: 92px;
+        min-height: 92px;
+        padding: 4px 4px 7px;
+        border-radius: 12px;
+        border-width: 2px;
+        overflow: hidden;
     }
 
-    .canvas-area{
-        min-height:76px;
+    .mobile-graph-wrap .graph-header {
+        font-size: 0.52rem;
+        line-height: 1;
+        margin-bottom: 2px;
     }
 
-    main{
-        flex:0 0 300px;
-        height:300px;
-        min-height:300px;
-        display:grid;
-        grid-template-columns:minmax(0,1fr) 140px;
-        gap:6px;
-        padding:0 6px;
-        overflow:hidden;
+    .mobile-graph-wrap .canvas-area {
+        flex: 1;
+        min-height: 0;
     }
 
-    .sim-container{
-        height:100%;
-        min-height:300px;
-        border-radius:16px;
-        overflow:hidden;
+    .data-card {
+        padding: 4px;
+        border-radius: 9px;
     }
 
-    .side-panel{
-        height:100%;
-        min-height:0;
-        overflow:hidden;
-        gap:4px;
+    .data-card h3 {
+        font-size: 0.5rem;
+        margin-bottom: 2px;
     }
 
-    .data-card{
-        padding:5px;
-        border-radius:10px;
+    .data-grid {
+        gap: 3px;
     }
 
-    .data-card h3{
-        font-size:0.56rem;
-        margin-bottom:3px;
+    .data-item {
+        padding: 3px;
+        border-radius: 7px;
     }
 
-    .data-grid{
-        gap:4px;
+    .data-label {
+        font-size: 0.4rem;
     }
 
-    .data-item{
-        padding:4px;
-        border-radius:8px;
+    .data-val {
+        font-size: 0.54rem;
     }
 
-    .data-label{
-        font-size:0.45rem;
+    .controls {
+        flex: 0 0 auto;
+        padding: 2px 4px 3px;
+        gap: 3px;
+        overflow: hidden;
     }
 
-    .data-val{
-        font-size:0.6rem;
+    .control-row {
+        gap: 4px;
     }
 
-    .controls{
-        flex:0 0 auto;
-        padding:5px 6px 8px;
-        gap:4px;
+    .btn {
+        padding: 4px 6px;
+        font-size: 0.52rem;
+        border-radius: 16px;
     }
 
-    .control-row{
-        gap:5px;
+    .btn-drop {
+        font-size: 0.62rem;
     }
 
-    .btn{
-        padding:6px 8px;
-        font-size:0.58rem;
-        border-radius:18px;
+    .slider-wrap {
+        font-size: 0.46rem;
+        gap: 4px;
+        min-width: 100px;
     }
 
-    .btn-drop{
-        font-size:0.7rem;
-    }
-
-    .slider-wrap{
-        font-size:0.52rem;
-        gap:4px;
-        min-width:120px;
-    }
-
-    input[type=range]{
-        min-width:80px;
+    input[type=range] {
+        min-width: 60px;
     }
 }
-    </style>
+</style>
 </head>
+
 <body>
 <div id="rotateGuide">
-  <div class="rotateBox">
-    <div class="rotateIcon">📱↔️</div>
-    <h2>화면을 가로로 돌려주세요</h2>
-    <p>이 앱은 모바일·태블릿 가로 화면에서 가장 안정적으로 실행됩니다.</p>
-  </div>
+    <div class="rotateBox">
+        <div class="rotateIcon">📱↔️</div>
+        <h2>화면을 가로로 돌려주세요</h2>
+        <p>이 앱은 모바일·태블릿 가로 화면에서 가장 안정적으로 실행됩니다.</p>
+    </div>
 </div>
+
 <div class="app-container">
     <header>
         <button class="fs-btn" onclick="toggleFullScreen()">전체화면</button>
@@ -369,28 +601,32 @@
         <h1>Gravity Deliverer: 중력 택배 자격증 따기 미션</h1>
     </header>
 
-   <nav>
-    <button class="nav-btn" onclick="location.href='tab1.html'">🛸 신입 기사 훈련소</button>
-    <button class="nav-btn active" onclick="location.href='tab2.html'">🎬 GD’s Motion Lab</button>
-    <button class="nav-btn" onclick="location.href='tab4.html'">📦 배송 미션</button>
-    <button class="nav-btn" onclick="location.href='tab8.html'">📒 업무 매뉴얼</button>
-    <button class="nav-btn" onclick="location.href='tab8.html'">🪪 GD 자격증</button>
-</nav>
+    <nav>
+        <button class="nav-btn" onclick="location.href='tab1.html'">🛸 신입 기사 훈련소</button>
+        <button class="nav-btn active" onclick="location.href='tab2.html'">🎬 GD’s Motion Lab</button>
+        <button class="nav-btn" onclick="location.href='tab4.html'">📦 배송 미션</button>
+        <button class="nav-btn" onclick="location.href='tab8.html'">📒 업무 매뉴얼</button>
+        <button class="nav-btn" onclick="location.href='tab8.html'">🪪 GD 자격증</button>
+    </nav>
 
     <div class="sub-nav">
-    <button class="sub-btn active" onclick="location.href='tab2.html'">📦 Lab1. 무거운 물체 배송 (자유낙하)</button>
-    <button class="sub-btn" onclick="location.href='tab3.html'">☄ Lab2. 장거리 배송 (수평 던지기)</button>
-</div>
+        <button class="sub-btn active" onclick="location.href='tab2.html'">📦 Lab1. 무거운 물체 배송 (자유낙하)</button>
+        <button class="sub-btn" onclick="location.href='tab3.html'">☄ Lab2. 장거리 배송 (수평 던지기)</button>
+    </div>
 
     <div class="info-section">
         <div class="cat-wrap">
             <svg class="cat-character" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="50" cy="50" r="45" fill="rgba(255,255,255,0.1)" stroke="#00f7ff" stroke-width="2"/>
-                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/><circle cx="50" cy="45" r="25" fill="#f8fafc"/>
-                <path d="M35 30 L25 10 L45 25 Z" fill="#e2e8f0"/><path d="M65 30 L75 10 L55 25 Z" fill="#e2e8f0"/>
-                <circle cx="42" cy="42" r="3" fill="#000"/><circle cx="58" cy="42" r="3" fill="#000"/>
+                <path d="M30 40 Q50 10 70 40 L70 80 Q50 90 30 80 Z" fill="#e2e8f0"/>
+                <circle cx="50" cy="45" r="25" fill="#f8fafc"/>
+                <path d="M35 30 L25 10 L45 25 Z" fill="#e2e8f0"/>
+                <path d="M65 30 L75 10 L55 25 Z" fill="#e2e8f0"/>
+                <circle cx="42" cy="42" r="3" fill="#000"/>
+                <circle cx="58" cy="42" r="3" fill="#000"/>
                 <path d="M48 50 Q50 55 52 50" stroke="#000" fill="none" stroke-width="2"/>
-                <rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/><text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
+                <rect x="35" y="80" width="30" height="35" rx="10" fill="#334155"/>
+                <text x="44" y="98" font-size="8" fill="white" font-weight="bold">GD</text>
             </svg>
             <div class="dialogue-box">
                 Yo~ 훈련소에서 ⏱ <b>시간 간격</b>에 따른 물체의 📸 <b>다중 섬광 사진 차이</b>는 잘 보았냥? <br>
@@ -398,6 +634,7 @@
                 🌌 <b>진공</b>일 때랑 💨 <b>공기저항</b>이 있을 때 낙하 운동이 어떻게 다른지 그래프를 통해 잘 관찰해봐냥! 렛츠 기릿~
             </div>
         </div>
+
         <div class="graph-wrap">
             <div class="graph-header">📈 실시간 속력 변화 그래프 (v-t)</div>
             <div class="canvas-area"><canvas id="vtCanvas"></canvas></div>
@@ -410,10 +647,19 @@
         </div>
 
         <div class="side-panel">
+            <div class="graph-wrap mobile-graph-wrap">
+                <div class="graph-header">📈 실시간 속력 변화 그래프 (v-t)</div>
+                <div class="canvas-area"><canvas id="vtCanvasMobile"></canvas></div>
+            </div>
+
             <div class="data-card">
                 <h3>⏱ 공통 정보</h3>
-                <div class="data-item" style="width:100%"><div class="data-label">경과 시간 (t)</div><div class="data-val" id="time-val">0.000 s</div></div>
+                <div class="data-item" style="width:100%">
+                    <div class="data-label">경과 시간 (t)</div>
+                    <div class="data-val" id="time-val">0.000 s</div>
+                </div>
             </div>
+
             <div class="data-card">
                 <h3>🪶 물체 A (가벼운 깃털)</h3>
                 <div class="data-grid">
@@ -421,13 +667,17 @@
                     <div class="data-item"><div class="data-label">현재 속력</div><div class="data-val" id="v-a">0.0m/s</div></div>
                 </div>
             </div>
+
             <div class="data-card">
                 <h3>💎 물체 B (무거운 금고)</h3>
                 <div class="data-grid">
                     <div class="data-item"><div class="data-label">현재 높이</div><div class="data-val" id="h-b">10.0m</div></div>
                     <div class="data-item"><div class="data-label">현재 속력</div><div class="data-val" id="v-b">0.0m/s</div></div>
                 </div>
-                <div class="data-item" style="margin-top:8px; width:100%; border: 1px solid var(--magenta);"><div class="data-label">B의 설정 질량</div><div class="data-val" id="mass-val" style="color:var(--magenta)">50 kg</div></div>
+                <div class="data-item" style="margin-top:8px; width:100%; border: 1px solid var(--magenta);">
+                    <div class="data-label">B의 설정 질량</div>
+                    <div class="data-val" id="mass-val" style="color:var(--magenta)">50 kg</div>
+                </div>
             </div>
         </div>
     </main>
@@ -437,7 +687,7 @@
             <button class="btn btn-mode active" id="mode-vac" onclick="setAir(false)">🌌 진공 상태 (Vacuum)</button>
             <button class="btn btn-mode" id="mode-air" onclick="setAir(true)">💨 공기 저항 (Air)</button>
             <div class="slider-wrap">
-                <span>물체 B 질량 조절</span> 
+                <span>물체 B 질량 조절</span>
                 <input type="range" id="mass-slider" min="1" max="100" step="1" value="50" oninput="updateMass()">
             </div>
         </div>
@@ -449,181 +699,269 @@
 </div>
 
 <script>
-    const simCanvas = document.getElementById('simCanvas');
-    const simCtx = simCanvas.getContext('2d');
-    const vtCanvas = document.getElementById('vtCanvas');
-    const vtCtx = vtCanvas.getContext('2d');
-    const massSlider = document.getElementById('mass-slider');
-    const massValText = document.getElementById('mass-val');
+const simCanvas = document.getElementById('simCanvas');
+const simCtx = simCanvas.getContext('2d');
 
-    let isRunning = false;
-    let isAir = false;
-    let time = 0;
-    
-    let objA = { y: 40, vy: 0, landed: false, vt: [], color: '#00f7ff', type: 'feather' };
-    let objB = { y: 40, vy: 0, landed: false, vt: [], color: '#ff2ef7', type: 'safe', mass: 50 };
+const vtCanvas = document.getElementById('vtCanvas');
+const vtCtx = vtCanvas.getContext('2d');
 
-    const G = 0.12; 
+const vtCanvasMobile = document.getElementById('vtCanvasMobile');
+const vtCtxMobile = vtCanvasMobile.getContext('2d');
 
-    function resize() {
-        const container = document.getElementById('sim-container');
-        simCanvas.width = container.clientWidth;
-        simCanvas.height = container.clientHeight;
-        const canvasArea = document.querySelector('.canvas-area');
-        vtCanvas.width = canvasArea.clientWidth;
-        vtCanvas.height = canvasArea.clientHeight;
-        drawSim(); drawVT();
-    }
-    window.addEventListener('resize', resize);
-    resize();
+const massSlider = document.getElementById('mass-slider');
+const massValText = document.getElementById('mass-val');
 
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else if (document.exitFullscreen) document.exitFullscreen();
-    }
+let isRunning = false;
+let isAir = false;
+let time = 0;
 
-    function setAir(val) {
-        if (isRunning) return;
-        isAir = val;
-        document.getElementById('mode-air').classList.toggle('active', val);
-        document.getElementById('mode-vac').classList.toggle('active', !val);
+let objA = { y: 40, vy: 0, landed: false, vt: [], color: '#00f7ff', type: 'feather' };
+let objB = { y: 40, vy: 0, landed: false, vt: [], color: '#ff2ef7', type: 'safe', mass: 50 };
+
+const G = 0.12;
+
+function isMobileLandscape() {
+    return window.matchMedia("(orientation: landscape)").matches &&
+           window.matchMedia("(pointer: coarse)").matches;
+}
+
+function resizeCanvasToParent(canvas) {
+    if (!canvas) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
+    const rect = parent.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.floor(rect.width));
+    canvas.height = Math.max(1, Math.floor(rect.height));
+}
+
+function resize() {
+    const container = document.getElementById('sim-container');
+
+    simCanvas.width = Math.max(1, container.clientWidth);
+    simCanvas.height = Math.max(1, container.clientHeight);
+
+    resizeCanvasToParent(vtCanvas);
+    resizeCanvasToParent(vtCanvasMobile);
+
+    drawSim();
+    drawVT();
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 250));
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else if (document.exitFullscreen) document.exitFullscreen();
+}
+
+function setAir(val) {
+    if (isRunning) return;
+    isAir = val;
+    document.getElementById('mode-air').classList.toggle('active', val);
+    document.getElementById('mode-vac').classList.toggle('active', !val);
+    resetSim();
+}
+
+function updateMass() {
+    if (isRunning) return;
+    objB.mass = parseInt(massSlider.value);
+    massValText.innerText = objB.mass + " kg";
+}
+
+function resetSim() {
+    isRunning = false;
+    time = 0;
+
+    objA = { y: 40, vy: 0, landed: false, vt: [], color: '#00f7ff', type: 'feather' };
+    objB = { y: 40, vy: 0, landed: false, vt: [], color: '#ff2ef7', type: 'safe', mass: parseInt(massSlider.value) };
+
+    document.getElementById('time-val').innerText = "0.000 s";
+    document.getElementById('drop-btn').innerText = "DROP THE BEAT (동시 투하!)";
+
+    drawSim();
+    drawVT();
+}
+
+function startSim() {
+    if (isRunning) {
         resetSim();
+        return;
     }
-
-    function updateMass() {
-        if (isRunning) return;
-        objB.mass = parseInt(massSlider.value);
-        massValText.innerText = objB.mass + " kg";
-    }
-
-    function resetSim() {
-        isRunning = false; time = 0;
-        objA = { y: 40, vy: 0, landed: false, vt: [], color: '#00f7ff', type: 'feather' };
-        objB = { y: 40, vy: 0, landed: false, vt: [], color: '#ff2ef7', type: 'safe', mass: parseInt(massSlider.value) };
-        document.getElementById('time-val').innerText = "0.000 s";
-        document.getElementById('drop-btn').innerText = "DROP THE BEAT (동시 투하!)";
-        drawSim(); drawVT();
-    }
-
-    function startSim() {
-        if (isRunning) { resetSim(); return; }
-        resetSim();
-        isRunning = true;
-        document.getElementById('drop-btn').innerText = "STOP";
-    }
-
-    function loop() {
-        if (isRunning) {
-            time++;
-            const calcPhys = (obj, isLight) => {
-                if (obj.landed) return;
-                let accel = G;
-                if (isAir) {
-                    let dragFactor = isLight ? 0.015 : 0.001; 
-                    accel = G - (dragFactor * obj.vy * obj.vy) / (obj.mass || 1);
-                    if (accel < 0) accel = 0;
-                }
-                obj.vy += accel;
-                obj.y += obj.vy;
-                obj.vt.push(obj.vy);
-                const groundLimit = simCanvas.height - 70;
-                if (obj.y >= groundLimit) { obj.y = groundLimit; obj.landed = true; }
-            };
-            calcPhys(objA, true);
-            calcPhys(objB, false);
-
-            document.getElementById('time-val').innerText = (time/60).toFixed(3) + " s";
-            document.getElementById('h-a').innerText = Math.max(0, (simCanvas.height - 110 - objA.y)/25).toFixed(1) + "m";
-            document.getElementById('v-a').innerText = (objA.vy * 5).toFixed(1) + "m/s";
-            document.getElementById('h-b').innerText = Math.max(0, (simCanvas.height - 110 - objB.y)/25).toFixed(1) + "m";
-            document.getElementById('v-b').innerText = (objB.vy * 5).toFixed(1) + "m/s";
-
-            if (objA.landed && objB.landed) {
-                isRunning = false;
-                document.getElementById('drop-btn').innerText = "실험 완료! (리셋)";
-            }
-        }
-        drawSim();
-        drawVT();
-        requestAnimationFrame(loop);
-    }
-
-    function drawSim() {
-        simCtx.clearRect(0,0,simCanvas.width, simCanvas.height);
-        const groundY = simCanvas.height - 40;
-        const centerX = simCanvas.width / 2;
-
-        simCtx.strokeStyle = "rgba(255,255,255,0.05)";
-        for(let i=0; i<simCanvas.height; i+=50) {
-            simCtx.beginPath(); simCtx.moveTo(0, i); simCtx.lineTo(simCanvas.width, i); simCtx.stroke();
-        }
-
-        simCtx.fillStyle = "#334155";
-        simCtx.fillRect(0, groundY, simCanvas.width, 80);
-        simCtx.strokeStyle = varHex('--cyan'); simCtx.lineWidth = 3;
-        simCtx.beginPath(); simCtx.moveTo(0, groundY); simCtx.lineTo(simCanvas.width, groundY); simCtx.stroke();
-
-        const drawObj = (o, x, icon) => {
-            simCtx.shadowBlur = 15; simCtx.shadowColor = o.color;
-            simCtx.fillStyle = o.color;
-            simCtx.fillRect(x - 25, o.y, 50, 50);
-            simCtx.shadowBlur = 0;
-            simCtx.fillStyle = "#fff"; simCtx.font = "30px serif";
-            simCtx.textAlign = "center";
-            simCtx.fillText(icon, x, o.y + 36);
-        };
-        drawObj(objA, centerX - 80, '🪶');
-        drawObj(objB, centerX + 80, '💎');
-    }
-
-    function drawVT() {
-        vtCtx.clearRect(0,0,vtCanvas.width, vtCanvas.height);
-        const w = vtCanvas.width, h = vtCanvas.height;
-       const isMobileLandscape =
-    window.matchMedia("(orientation: landscape)").matches &&
-    window.matchMedia("(pointer: coarse)").matches;
-
-const padL = isMobileLandscape ? 30 : 50;
-const padR = isMobileLandscape ? 34 : 65;
-const padT = isMobileLandscape ? 12 : 25;
-const padB = isMobileLandscape ? 22 : 35;
-
-        vtCtx.strokeStyle = "#ffffff"; vtCtx.lineWidth = 2; vtCtx.beginPath();
-        vtCtx.moveTo(padL, padT); vtCtx.lineTo(padL, h - padB); vtCtx.lineTo(w - padR, h - padB); vtCtx.stroke();
-        
-        vtCtx.beginPath();
-        vtCtx.moveTo(padL-5, padT+8); vtCtx.lineTo(padL, padT); vtCtx.lineTo(padL+5, padT+8);
-        vtCtx.moveTo(w-padR-8, h-padB-5); vtCtx.lineTo(w-padR, h-padB); vtCtx.lineTo(w-padR-8, h-padB+5);
-        vtCtx.stroke();
-
-        vtCtx.fillStyle = varHex('--yellow'); vtCtx.font = "bold 12px sans-serif";
-        vtCtx.textAlign = "center";
-        vtCtx.fillText("속", padL - 30, padT + 12); 
-        vtCtx.fillText("력", padL - 30, padT + 27); 
-        vtCtx.fillText("(v)", padL - 30, padT + 45);
-        
-        vtCtx.textAlign = "left"; 
-        vtCtx.fillText("시간 (t)", w - padR + 8, h - padB + 5);
-
-        const drawLine = (data, color) => {
-            if (data.length === 0) return;
-            vtCtx.strokeStyle = color; vtCtx.lineWidth = 4; vtCtx.beginPath();
-            const stepX = (w - padL - padR) / 400; 
-            const scaleY = (h - padB - padT - 15) / 10;
-            vtCtx.moveTo(padL, (h - padB) - data[0] * scaleY);
-            for (let i = 1; i < data.length; i++) {
-                vtCtx.lineTo(padL + i * stepX, (h - padB) - data[i] * scaleY);
-            }
-            vtCtx.stroke();
-        };
-        drawLine(objA.vt, objA.color);
-        drawLine(objB.vt, objB.color);
-    }
-
-    function varHex(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
     resetSim();
+    isRunning = true;
+    document.getElementById('drop-btn').innerText = "STOP";
+}
+
+function loop() {
+    if (isRunning) {
+        time++;
+
+        const calcPhys = (obj, isLight) => {
+            if (obj.landed) return;
+
+            let accel = G;
+
+            if (isAir) {
+                let dragFactor = isLight ? 0.015 : 0.001;
+                accel = G - (dragFactor * obj.vy * obj.vy) / (obj.mass || 1);
+                if (accel < 0) accel = 0;
+            }
+
+            obj.vy += accel;
+            obj.y += obj.vy;
+            obj.vt.push(obj.vy);
+
+            const groundLimit = simCanvas.height - (isMobileLandscape() ? 58 : 110);
+
+            if (obj.y >= groundLimit) {
+                obj.y = groundLimit;
+                obj.landed = true;
+            }
+        };
+
+        calcPhys(objA, true);
+        calcPhys(objB, false);
+
+        const groundLimit = simCanvas.height - (isMobileLandscape() ? 58 : 110);
+
+        document.getElementById('time-val').innerText = (time / 60).toFixed(3) + " s";
+        document.getElementById('h-a').innerText = Math.max(0, (groundLimit - objA.y) / 25).toFixed(1) + "m";
+        document.getElementById('v-a').innerText = (objA.vy * 5).toFixed(1) + "m/s";
+        document.getElementById('h-b').innerText = Math.max(0, (groundLimit - objB.y) / 25).toFixed(1) + "m";
+        document.getElementById('v-b').innerText = (objB.vy * 5).toFixed(1) + "m/s";
+
+        if (objA.landed && objB.landed) {
+            isRunning = false;
+            document.getElementById('drop-btn').innerText = "실험 완료! (리셋)";
+        }
+    }
+
+    drawSim();
+    drawVT();
     requestAnimationFrame(loop);
+}
+
+function drawSim() {
+    simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+
+    const mobile = isMobileLandscape();
+    const groundY = simCanvas.height - (mobile ? 34 : 80);
+    const centerX = simCanvas.width / 2;
+    const objectSize = mobile ? 38 : 50;
+    const iconSize = mobile ? 24 : 30;
+
+    simCtx.strokeStyle = "rgba(255,255,255,0.05)";
+    for (let i = 0; i < simCanvas.height; i += 50) {
+        simCtx.beginPath();
+        simCtx.moveTo(0, i);
+        simCtx.lineTo(simCanvas.width, i);
+        simCtx.stroke();
+    }
+
+    simCtx.fillStyle = "#334155";
+    simCtx.fillRect(0, groundY, simCanvas.width, simCanvas.height - groundY);
+
+    simCtx.strokeStyle = varHex('--cyan');
+    simCtx.lineWidth = 3;
+    simCtx.beginPath();
+    simCtx.moveTo(0, groundY);
+    simCtx.lineTo(simCanvas.width, groundY);
+    simCtx.stroke();
+
+    const drawObj = (o, x, icon) => {
+        simCtx.shadowBlur = 15;
+        simCtx.shadowColor = o.color;
+        simCtx.fillStyle = o.color;
+        simCtx.fillRect(x - objectSize / 2, o.y, objectSize, objectSize);
+        simCtx.shadowBlur = 0;
+
+        simCtx.fillStyle = "#fff";
+        simCtx.font = iconSize + "px serif";
+        simCtx.textAlign = "center";
+        simCtx.fillText(icon, x, o.y + objectSize * 0.72);
+    };
+
+    drawObj(objA, centerX - (mobile ? 55 : 80), '🪶');
+    drawObj(objB, centerX + (mobile ? 55 : 80), '💎');
+}
+
+function drawSingleVT(canvas, ctx) {
+    if (!canvas || !ctx || canvas.width <= 1 || canvas.height <= 1) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const mobile = isMobileLandscape();
+
+    const padL = mobile ? 24 : 50;
+    const padR = mobile ? 24 : 65;
+    const padT = mobile ? 8 : 25;
+    const padB = mobile ? 18 : 35;
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = mobile ? 1.3 : 2;
+    ctx.beginPath();
+    ctx.moveTo(padL, padT);
+    ctx.lineTo(padL, h - padB);
+    ctx.lineTo(w - padR, h - padB);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(padL - 4, padT + 7);
+    ctx.lineTo(padL, padT);
+    ctx.lineTo(padL + 4, padT + 7);
+    ctx.moveTo(w - padR - 7, h - padB - 4);
+    ctx.lineTo(w - padR, h - padB);
+    ctx.lineTo(w - padR - 7, h - padB + 4);
+    ctx.stroke();
+
+    ctx.fillStyle = varHex('--yellow');
+    ctx.font = mobile ? "bold 8px sans-serif" : "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("속력", padL - (mobile ? 13 : 30), padT + (mobile ? 10 : 20));
+    ctx.fillText("(v)", padL - (mobile ? 13 : 30), padT + (mobile ? 21 : 45));
+
+    ctx.textAlign = "left";
+    ctx.fillText("시간(t)", w - padR + 3, h - padB + 3);
+
+    const drawLine = (data, color) => {
+        if (data.length === 0) return;
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = mobile ? 2 : 4;
+        ctx.beginPath();
+
+        const stepX = (w - padL - padR) / 400;
+        const scaleY = (h - padB - padT - 5) / 10;
+
+        ctx.moveTo(padL, (h - padB) - data[0] * scaleY);
+
+        for (let i = 1; i < data.length; i++) {
+            ctx.lineTo(padL + i * stepX, (h - padB) - data[i] * scaleY);
+        }
+
+        ctx.stroke();
+    };
+
+    drawLine(objA.vt, objA.color);
+    drawLine(objB.vt, objB.color);
+}
+
+function drawVT() {
+    drawSingleVT(vtCanvas, vtCtx);
+    drawSingleVT(vtCanvasMobile, vtCtxMobile);
+}
+
+function varHex(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+resize();
+resetSim();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
