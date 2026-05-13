@@ -148,29 +148,36 @@
         font-size:1.05rem;
     }
 }
-
-/* 모바일 가로 안정화 */
-/* 모바일 가로 안정화 */
+/* 모바일 가로 안정화 - 스크롤 허용 버전 */
 @media (orientation: landscape) and (pointer: coarse){
 
+    html, body{
+        width:100%;
+        height:auto;
+        min-height:100dvh;
+        overflow-x:hidden;
+        overflow-y:auto;
+    }
+
     .app-container{
-        height:100dvh;
-        padding:2px;
+        width:100vw;
+        min-height:620px;
+        height:auto;
+        padding:4px;
         display:flex;
         flex-direction:column;
-        overflow:hidden;
+        overflow:visible;
     }
 
     header{
         flex:0 0 auto;
-        padding:3px 0 1px;
+        padding:3px 0 2px;
     }
 
     header .top-slogan{
-        display:block;
-        font-size:0.62rem;
+        font-size:0.68rem;
         line-height:1;
-        margin-bottom:1px;
+        margin-bottom:2px;
         white-space:nowrap;
         overflow:hidden;
         text-overflow:ellipsis;
@@ -178,7 +185,7 @@
     }
 
     header h1{
-        font-size:1.05rem;
+        font-size:1.15rem;
         line-height:1;
         white-space:nowrap;
         overflow:hidden;
@@ -187,55 +194,43 @@
     }
 
     .fs-btn{
-        top:3px;
-        right:5px;
+        top:4px;
+        right:6px;
         font-size:0.55rem;
-        padding:3px 5px;
+        padding:3px 6px;
     }
 
-    nav{
+    nav,
+    .sub-nav{
         flex:0 0 auto;
-        display:flex;
         justify-content:center;
-        align-items:center;
         gap:4px;
         padding:2px 4px;
         flex-wrap:nowrap;
+        overflow-x:auto;
     }
 
     .nav-btn{
-        flex:0 1 auto;
-        padding:4px 6px;
-        font-size:0.54rem;
-        border-radius:8px;
+        flex:0 0 auto;
+        padding:4px 7px;
+        font-size:0.58rem;
         white-space:nowrap;
     }
 
-    .sub-nav{
-        flex:0 0 auto;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        gap:4px;
-        margin-top:1px;
-        padding:0 4px;
-        flex-wrap:nowrap;
-    }
-
     .sub-btn{
-        flex:0 1 auto;
-        padding:3px 6px;
-        font-size:0.54rem;
+        flex:0 0 auto;
+        padding:4px 7px;
+        font-size:0.56rem;
         white-space:nowrap;
     }
 
     .info-section{
-        flex:0 0 92px;
-        height:72px;
-        min-height:92px;
+        flex:0 0 105px;
+        height:105px;
+        min-height:105px;
         gap:6px;
         padding:0 6px;
-        margin:2px 0;
+        margin:3px 0;
         overflow:hidden;
     }
 
@@ -246,20 +241,19 @@
     }
 
     .cat-character{
-        width:42px;
+        width:44px;
     }
 
     .dialogue-box{
-        font-size:0.6rem;
-        line-height:1.14;
-        padding:6px 8px;
-        border-radius:14px 14px 14px 0;
+        font-size:0.62rem;
+        line-height:1.18;
+        padding:7px 9px;
         overflow-y:auto;
     }
 
     .graph-wrap{
-        flex:0.85;
-        min-width:165px;
+        flex:0.9;
+        min-width:175px;
         border-width:2px;
         border-radius:14px;
         padding:4px;
@@ -272,24 +266,30 @@
         margin-bottom:2px;
     }
 
+    .canvas-area{
+        min-height:76px;
+    }
+
     main{
-        flex:1 1 auto;
-        min-height:0;
+        flex:0 0 300px;
+        height:300px;
+        min-height:300px;
         display:grid;
-        grid-template-columns:minmax(0,1fr) 138px;
+        grid-template-columns:minmax(0,1fr) 140px;
         gap:6px;
         padding:0 6px;
         overflow:hidden;
     }
 
     .sim-container{
-        min-height:0;
         height:100%;
+        min-height:300px;
         border-radius:16px;
         overflow:hidden;
     }
 
     .side-panel{
+        height:100%;
         min-height:0;
         overflow:hidden;
         gap:4px;
@@ -324,32 +324,32 @@
 
     .controls{
         flex:0 0 auto;
-        padding:3px 6px 4px;
-        gap:3px;
-    }
-
-    .control-row{
+        padding:5px 6px 8px;
         gap:4px;
     }
 
+    .control-row{
+        gap:5px;
+    }
+
     .btn{
-        padding:5px 6px;
-        font-size:0.56rem;
+        padding:6px 8px;
+        font-size:0.58rem;
         border-radius:18px;
     }
 
     .btn-drop{
-        font-size:0.66rem;
+        font-size:0.7rem;
     }
 
     .slider-wrap{
-        font-size:0.5rem;
+        font-size:0.52rem;
         gap:4px;
-        min-width:115px;
+        min-width:120px;
     }
 
     input[type=range]{
-        min-width:70px;
+        min-width:80px;
     }
 }
     </style>
@@ -526,7 +526,7 @@
                 obj.vy += accel;
                 obj.y += obj.vy;
                 obj.vt.push(obj.vy);
-                const groundLimit = simCanvas.height - 65;
+                const groundLimit = simCanvas.height - 70;
                 if (obj.y >= groundLimit) { obj.y = groundLimit; obj.landed = true; }
             };
             calcPhys(objA, true);
@@ -550,7 +550,7 @@
 
     function drawSim() {
         simCtx.clearRect(0,0,simCanvas.width, simCanvas.height);
-        const groundY = simCanvas.height - 35;
+        const groundY = simCanvas.height - 40;
         const centerX = simCanvas.width / 2;
 
         simCtx.strokeStyle = "rgba(255,255,255,0.05)";
@@ -579,7 +579,14 @@
     function drawVT() {
         vtCtx.clearRect(0,0,vtCanvas.width, vtCanvas.height);
         const w = vtCanvas.width, h = vtCanvas.height;
-        const padL = 50, padR = 65, padT = 25, padB = 26;
+       const isMobileLandscape =
+    window.matchMedia("(orientation: landscape)").matches &&
+    window.matchMedia("(pointer: coarse)").matches;
+
+const padL = isMobileLandscape ? 30 : 50;
+const padR = isMobileLandscape ? 34 : 65;
+const padT = isMobileLandscape ? 12 : 25;
+const padB = isMobileLandscape ? 22 : 35;
 
         vtCtx.strokeStyle = "#ffffff"; vtCtx.lineWidth = 2; vtCtx.beginPath();
         vtCtx.moveTo(padL, padT); vtCtx.lineTo(padL, h - padB); vtCtx.lineTo(w - padR, h - padB); vtCtx.stroke();
